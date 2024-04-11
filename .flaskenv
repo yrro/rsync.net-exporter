@@ -1,1 +1,1 @@
-FLASK_APP=hitron_exporter:app
+FLASK_APP=rsync_net_exporter:create_app

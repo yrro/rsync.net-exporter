@@ -2,7 +2,8 @@ import enum
 import os
 from logging import INFO, DEBUG, basicConfig, getLogger, getLevelName
 
-LOGGER = getLogger(__name__)
+
+logger = getLogger(__name__)
 
 
 class Host(enum.Enum):
@@ -34,8 +35,8 @@ def config_early() -> None:
     basicConfig(level=level)
 
     if host == Host.UNKNOWN:
-        LOGGER.warning("Unknown host environment; defaulting log level to INFO")
+        logger.warning("Unknown host environment; defaulting log level to INFO")
     else:
-        LOGGER.debug(
+        logger.debug(
             "Host environment: %s; log level: %s", host.name, getLevelName(level)
         )

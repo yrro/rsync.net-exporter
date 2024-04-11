@@ -1,6 +1,6 @@
-# hitron exporter
+# rsync.net exporter
 
-A [Prometheus](https://prometheus.io/) exporter for the Hitron CGN series CPE.
+A [Prometheus](https://prometheus.io/) exporter for [rsync.net](https://rsync.net/)
 
 The Hitron CGN series CPE are a combination cable modem, Wi-Fi access points,
 Analog Telephone Adapter, router, firewall device.
