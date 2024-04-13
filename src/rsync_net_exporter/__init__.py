@@ -19,7 +19,7 @@ def create_app() -> Flask:
     metrics.info(
         "rsyncnet_exporter_info",
         "Information about rsync.net-exporter itself",
-        version=metadata.version("rsync.net-exporter"),
+        version=metadata.version("rsync-net-exporter"),
     )
 
     return app
