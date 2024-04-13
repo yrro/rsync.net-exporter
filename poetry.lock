@@ -1436,9 +1436,9 @@ docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.link
 testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-ignore-flaky", "pytest-mypy", "pytest-ruff (>=0.2.1)"]
 
 [extras]
-container = ["gunicorn", "setproctitle"]
+production = ["gunicorn", "setproctitle"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "996a5e546b298691a3888cc104a4d1f82b0852f87a19dd5ae18c63600a156ca8"
+content-hash = "e7064991600440ba4f4c1f9203d565f5bf8b29fcafddd09eaf2d365a9b1b1408"
