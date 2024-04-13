@@ -24,6 +24,7 @@ pytest-httpserver = "^1.0.6"
 pytest-github-report = "^0.0.1"
 pytest-github-actions-annotate-failures = "^0.1.8"
 pytest-pilot = "^0.8.0"
+types-requests = "^2.31.0.20240406"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

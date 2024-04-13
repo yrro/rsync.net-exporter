@@ -96,33 +96,38 @@ class Collector(prometheus_client.registry.Collector):
         yield self.__mf_snap_used_custom
         yield self.__mf_idle
 
-    def raise_for_netloc(self):
+    def raise_for_netloc(self) -> None:
         netloc = urlsplit(self.__target).netloc
         host, sep, port = netloc.partition(":")
         if host != "www.rsync.net":
             raise Exception("NO")
 
-    def collect_account(self, item) -> Iterator[prometheus_client.Metric]:
+    def collect_account(self, item: ET.Element) -> None:
         labelvalues = []
         for labelname in self.__labelnames:
-            labelvalues.append(item.find(labelname).text or "")
+            labelvalues.append(item.findtext(labelname) or "")
 
-        self.__mf_quota.add_metric(
-            labelvalues, float(item.find("quota_gb").text) * 2**30
-        )
-        self.__mf_billed.add_metric(
-            labelvalues, float(item.find("billed_gb").text) * 2**30
-        )
-        self.__mf_dataset.add_metric(
-            labelvalues, float(item.find("dataset_bytes").text)
-        )
-        self.__mf_inodes.add_metric(labelvalues, float(item.find("inodes").text))
-        self.__mf_snap_used_free.add_metric(
-            labelvalues, float(item.find("snap_used_free_gb").text)
-        )
+        if quota_gb := item.findtext("quota_gb"):
+            self.__mf_quota.add_metric(labelvalues, float(quota_gb) * 2**30)
+
+        if billed_gb := item.findtext("billed_gb"):
+            self.__mf_billed.add_metric(labelvalues, float(billed_gb) * 2**30)
+
+        if dataset_bytes := item.findtext("dataset_bytes"):
+            self.__mf_dataset.add_metric(labelvalues, float(dataset_bytes))
+
+        if inodes := item.findtext("inodes"):
+            self.__mf_inodes.add_metric(labelvalues, float(inodes))
+
+        if snap_used_free_gb := item.findtext("snap_used_free_gb"):
+            self.__mf_snap_used_free.add_metric(
+                labelvalues, float(snap_used_free_gb) * 2**30
+            )
+
+        snap_used_cust_gb = item.findtext("snap_used_cust_gb") or "0"
         self.__mf_snap_used_custom.add_metric(
-            labelvalues, float(item.find("snap_used_cust_gb").text or "0")
+            labelvalues, float(snap_used_cust_gb) * 2**30
         )
-        self.__mf_idle.add_metric(
-            labelvalues, float(item.find("usage_idle_days").text) * 86400
-        )
+
+        if usage_idle_days := item.findtext("usage_idle_days"):
+            self.__mf_idle.add_metric(labelvalues, float(usage_idle_days) * 86400)

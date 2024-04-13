@@ -1,7 +1,7 @@
 from importlib import metadata
 
 from flask import Flask
-from prometheus_flask_exporter import PrometheusMetrics  # type: ignore [import]
+from prometheus_flask_exporter import PrometheusMetrics  # type: ignore [import-untyped]
 
 from . import (
     log_config,
@@ -9,7 +9,7 @@ from . import (
 )
 
 
-def create_app():
+def create_app() -> Flask:
     log_config.config_early()
 
     app = Flask(__name__)
