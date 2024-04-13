@@ -6,11 +6,7 @@ import xml.etree.ElementTree as ET
 from flask import Blueprint, request
 from flask.typing import ResponseReturnValue
 import prometheus_client
-from prometheus_client.core import (
-    CounterMetricFamily,
-    GaugeMetricFamily,
-    InfoMetricFamily,
-)
+from prometheus_client.core import GaugeMetricFamily
 import requests
 
 
