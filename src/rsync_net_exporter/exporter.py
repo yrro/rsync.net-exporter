@@ -17,7 +17,6 @@ exporter = Blueprint("exporter", __name__)
 
 @exporter.route("/probe")
 def probe() -> ResponseReturnValue:
-
     if not (target := request.args.get("target")):
         return "Missing parameter: 'target'", 400
 
@@ -29,7 +28,6 @@ def probe() -> ResponseReturnValue:
 
 
 class Collector(prometheus_client.registry.Collector):
-
     def __init__(self, target: str) -> None:
         self.__target = target
         self.__labelnames = ["uid", "nickname", "location"]
