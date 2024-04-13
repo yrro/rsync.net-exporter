@@ -1,5 +1,6 @@
 from logging import getLogger
 from typing import Iterator
+from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
 
 from flask import Blueprint, request
@@ -71,6 +72,8 @@ class Collector(prometheus_client.registry.Collector):
         )
 
     def collect(self) -> Iterator[prometheus_client.Metric]:
+        self.raise_for_netloc()
+
         resp = requests.get(self.__target, timeout=5)
         resp.raise_for_status()
 
@@ -92,6 +95,12 @@ class Collector(prometheus_client.registry.Collector):
         yield self.__mf_snap_used_free
         yield self.__mf_snap_used_custom
         yield self.__mf_idle
+
+    def raise_for_netloc(self):
+        netloc = urlsplit(self.__target).netloc
+        host, sep, port = netloc.partition(":")
+        if host != "www.rsync.net":
+            raise Exception("NO")
 
     def collect_account(self, item) -> Iterator[prometheus_client.Metric]:
         labelvalues = []
