@@ -73,7 +73,9 @@ class Collector(prometheus_client.registry.Collector):
 
         root = ET.fromstring(resp.text)  # nosec
         if root.tag != "rss":
-            raise Exception(f"Got XML but with unexpected root element {root.tag!r}")
+            raise CollectorException(
+                f"Got XML but with unexpected root element {root.tag!r}"
+            )
 
         for item in root.iterfind("channel/item"):
             if not item.findtext("uid"):
@@ -125,3 +127,7 @@ class Collector(prometheus_client.registry.Collector):
 
         if usage_idle_days := item.findtext("usage_idle_days"):
             self.__mf_idle.add_metric(labelvalues, float(usage_idle_days) * 86400)
+
+
+class CollectorException(Exception):
+    pass
