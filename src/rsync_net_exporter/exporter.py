@@ -32,7 +32,9 @@ def probe() -> ResponseReturnValue:
     return prometheus_client.make_wsgi_app(reg)
 
 
-class Collector(prometheus_client.registry.Collector):
+class Collector(
+    prometheus_client.registry.Collector
+):  # pylint: disable=too-many-instance-attributes
     def __init__(self, target: str) -> None:
         self.__target = target
         self.__labelnames = ["uid", "nickname", "location"]
