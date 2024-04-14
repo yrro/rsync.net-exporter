@@ -79,6 +79,3 @@ repos:
   rev: 'v0.3.7'
   hooks:
   - id: ruff
-    args:
-    - --fix
-    - --exit-non-zero-on-fix
