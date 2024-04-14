@@ -27,9 +27,9 @@ jobs:
       run: poetry install --no-interaction --with=dev
 
     - name: Run pre-commit checks
-      uses: pre-commit/action@v3.0.0
+      uses: pre-commit/action@v3.0.1
       env:
         SKIP: safety-check,pytest
 
-    - uses: pre-commit-ci/lite-action@v1.0.1
+    - uses: pre-commit-ci/lite-action@v1.0.2
       if: always()
