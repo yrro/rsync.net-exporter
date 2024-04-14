@@ -50,7 +50,6 @@ testpaths = ["tests"]
 
 [tool.bandit]
 targets = ["src"]
-skips = ["B404", "B607", "B603"]
 
 [tool.ruff]
 target-version = "py39"
