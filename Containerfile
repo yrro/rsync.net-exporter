@@ -68,7 +68,7 @@ ENV \
 
 ADD gunicorn.conf.py .
 
-CMD ["venv/bin/gunicorn"]
+ENTRYPOINT ["venv/bin/python", "-m", "gunicorn"]
 
 EXPOSE 9770
 

@@ -51,7 +51,7 @@ sample_xml = """\
    </item>
 
  </channel>
-</rss>\
+</rss>
 """
 
 
@@ -135,7 +135,7 @@ sample_xml_snap_used_cust_empty = """\
    </item>
 
  </channel>
-</rss>\
+</rss>
 """
 
 

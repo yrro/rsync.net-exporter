@@ -1,17 +1,15 @@
-import binascii
-import hashlib
-import json
 import logging
+import os
 import ssl
 import subprocess
 import time
 
 import pytest
+import requests
 import trustme
-import urllib3
-from werkzeug.wrappers import Request, Response
 
 from .conftest import suite
+
 
 pytestmark = suite("container")
 
@@ -24,282 +22,152 @@ def ca():
 
 
 @pytest.fixture(scope="session")
-def hitron_cert(ca):
-    # The real web server's TLS server certificate has no Subject Alternative Name
-    # values, and a subject of:
-    # CN=02:00:00:00:00:00,
-    # OU=No. 40\, Wu-kung 5th Rd.\, Wu-ku\, Taipei Hsien\, Taiwan,
-    # O=Hitron Technologies,
-    # C=TW
-    return ca.issue_cert(common_name="02:00:00:00:00:00")
-
-
-@pytest.fixture(scope="session")
-def httpserver_ssl_context(hitron_cert):
+def httpserver_ssl_context(ca):
     """
-    This fixture causes pytest_httpserver to become an HTTPS server."""
+    This fixture causes pytest_httpserver to become an HTTPS server.
+    """
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    hitron_cert.configure_cert(context)
+    server_cert = ca.issue_cert("www.rsync.net")
+    server_cert.configure_cert(context)
     return context
 
 
-def image_default_args(image: str) -> str:
-    p0 = subprocess.run(
-        ["podman", "image", "inspect", "hitron-exporter"],
-        stdout=subprocess.PIPE,
-        text=True,
-    )
-    if p0.returncode != 0:
-        pytest.fail("Couldn't inspect container image")
-
-    image_inspect = json.loads(p0.stdout)
-    try:
-        return next(
-            (
-                e
-                for e in image_inspect[0]["Config"]["Env"]
-                if e.startswith("GUNICORN_CMD_ARGS=")
-            ),
-        )
-    except StopIteration:
-        pytest.fail("Couldn't find GUNICORN_CMD_ARGS in image environment")
-
-
 @pytest.fixture(scope="module")
-def container():
-    default_args = image_default_args("localhost/hitron-exporter")
-    p = subprocess.run(
-        [
-            "podman",
-            "run",
-            "-d",
-            "--rm",
-            "--pull=never",
-            "--network=slirp4netns:allow_host_loopback=true",
-            "--publish=127.0.0.1::9938",
-            f"--env={default_args} --log-level=debug",
-            "localhost/hitron-exporter",
-        ],
-        stdout=subprocess.PIPE,
-        text=True,
-    )
-    if p.returncode != 0:
-        pytest.fail("Couldn't start container")
-    ctr = p.stdout.rstrip()
-
-    try:
-        p2 = subprocess.run(
-            ["podman", "port", ctr, "9938/tcp"],
+def container(ca):
+    with ca.cert_pem.tempfile() as ca_temp_path:
+        os.chmod(ca_temp_path, 0o644)
+        p = subprocess.run(
+            [
+                "podman",
+                "run",
+                "-d",
+                "--rm",
+                "--pull=never",
+                "--network=slirp4netns:allow_host_loopback=true",
+                "--publish=127.0.0.1::9770",
+                "--add-host=www.rsync.net:10.0.2.2",
+                f"--volume={ca_temp_path}:/tmp/ca-bundle.crt:ro,Z",
+                "--env=REQUESTS_CA_BUNDLE=/tmp/ca-bundle.crt",
+                "localhost/rsync.net-exporter",
+                "--log-level=debug",
+            ],
             stdout=subprocess.PIPE,
             text=True,
-            check=True,
         )
-        host, sep, port_ = p2.stdout.rstrip().partition(":")
-        addr = (host, int(port_))
+        if p.returncode != 0:
+            pytest.fail("Couldn't start container")
 
-        # XXX no better way to wait for conatiner readiness?
-        time.sleep(2)
+        try:
+            ctr = p.stdout.rstrip()
+            p2 = subprocess.run(
+                ["podman", "port", ctr, "9770/tcp"],
+                stdout=subprocess.PIPE,
+                text=True,
+                check=True,
+            )
+            host, sep, port_ = p2.stdout.rstrip().partition(":")
+            addr = (host, int(port_))
 
-        yield addr
-    finally:
-        p3 = subprocess.run(
-            ["podman", "logs", ctr],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
-        logger.info("----- BEGIN CONTAINER LOGS ----")
-        for line in p3.stdout.split("\n"):
-            if line:
-                logger.info("%s", line)
-        logger.info("----- END CONTAINER LOGS ----")
-        subprocess.run(["podman", "stop", ctr], stdout=subprocess.DEVNULL, check=True)
+            # XXX no better way to wait for conatiner readiness?
+            time.sleep(2)
+
+            yield addr
+        finally:
+            try:
+                p3 = subprocess.run(
+                    ["podman", "logs", ctr],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+                logger.info("----- BEGIN CONTAINER LOGS ----")
+                for line in p3.stdout.split("\n"):
+                    if line:
+                        logger.info("%s", line)
+                logger.info("----- END CONTAINER LOGS ----")
+            finally:
+                subprocess.run(["podman", "stop", ctr], stdout=subprocess.DEVNULL, check=True)
 
 
 def test_metrics(container):
     # given:
-    http = urllib3.PoolManager(retries=False)
     url = f"http://{container[0]}:{container[1]}/metrics"
 
     # when:
-    r = http.request("GET", url)
+    r = requests.get(url, timeout=2)
 
     # then:
-    assert r.status == 200
+    r.raise_for_status()
 
 
 @pytest.fixture
-def hitron_server(httpserver):
+def rsync_net_server(httpserver):
     """
-    Note: to see the logs of the mock Hitron web server, run pytest with
+    Note: to see the logs of the mock rsync.net web server, run pytest with
     --log-level=DEBUG.
     """
-    httpserver.expect_request("/", method="GET").respond_with_data(
-        "",
-        status=302,
-        headers={
-            "Set-Cookie": "preSession=presession_id; path=/",
-            "Location": httpserver.url_for("/login.html"),
-        },
+    httpserver.expect_request("/rss.xml", method="GET").respond_with_data(
+"""\
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+ <channel>
+   <title>Rsync.net Usage Report RSS Feed - Sun, 14 Apr 2024 09:18:46 PT</title>
+   <link>https://www.rsync.net/am/rss.xml</link>
+   <lastBuildDate>Sun, 14 Apr 2024 09:18:46 PT</lastBuildDate>
+   <description>This is a usage report detailing how much disk space you are using and your quota.</description>
+   <language>en</language>
+
+   <item>
+     <title>Current Total Standard Usage</title>
+     <link>https://www.rsync.net/am/dashboard.html</link>
+     <pubDate>Sun, 14 Apr 2024 09:01:01 PT</pubDate>
+     <description><![CDATA[120.15 GB]]></description>
+     <guid>https://rsync.net</guid>
+   </item>
+
+   <item>
+     <title>tr3289</title>
+     <link>https://www.rsync.net/am/dashboard.html</link>
+     <pubDate>Sun, 14 Apr 2024 09:01:01 PT</pubDate>
+     <description><![CDATA["120.15 GB<br>120.00 GB Quota"]]></description>
+     <guid>https://rsync.net</guid>
+     <uid>tr3289</uid>
+     <nickname>myspace</nickname>
+     <gr></gr>
+     <location>CH</location>
+     <quota_gb>120</quota_gb>
+     <billed_gb>120.15</billed_gb>
+     <dataset_gb>120.15</dataset_gb>
+     <dataset_bytes>119011805184</dataset_bytes>
+     <inodes>5681</inodes>
+     <free_snaps_conf>0</free_snaps_conf>
+     <custom_snaps_conf></custom_snaps_conf>
+     <snap_used_free_gb>12.1</snap_used_free_gb>
+     <snap_used_cust_gb>14.7</snap_used_cust_gb>
+     <idlewarn_days>7</idlewarn_days>
+     <idlewarn_freq>24</idlewarn_freq>
+     <idlewarn_min_bytes>1024</idlewarn_min_bytes>
+     <usage_idle_days>2</usage_idle_days>
+     <ssh_ro></ssh_ro>
+     <pass_ro>1</pass_ro>
+     <fs_ro></fs_ro>
+   </item>
+
+ </channel>
+</rss>
+""",
     )
-
-    def login_handler(request: Request) -> Response:
-        assert request.form.get("usr") == "uuu"
-        assert request.form.get("pwd") == "ppp"
-        assert request.form.get("preSession") == "presession_id"
-        return Response(
-            "success", headers={"Set-Cookie": "session=sessionid; path=/; HttpOnly"}
-        )
-
-    httpserver.expect_request("/goform/login", method="POST").respond_with_handler(
-        login_handler
-    )
-
-    data = {
-        "system_model": {"modelName": "CGNV4-FX4", "skipWizard": "1"},
-        "getSysInfo": [
-            {
-                "LRecPkt": "12.12M Bytes",
-                "LSendPkt": "40.14M Bytes",
-                "WRecPkt": "40.25M Bytes",
-                "WSendPkt": "11.77M Bytes",
-                "aftrAddr": "",
-                "aftrName": "",
-                "delegatedPrefix": "",
-                "hwVersion": "2D",
-                "lanIPv6Addr": "",
-                "lanIp": "192.0.2.0/24",
-                "rfMac": "84:0B:7C:01:02:03",
-                "serialNumber": "ABC123",
-                "swVersion": "4.5.10.201-CD-UPC",
-                "systemTime": "Fri Jun 17, 2022, 17:09:10",
-                "systemUptime": "10 Days,17 Hours,33 Minutes,47 Seconds",
-                "timezone": "1",
-                "wanIp": "203.0.113.1/24",
-            }
-        ],
-        "getCMInit": [
-            {
-                "bpiStatus": "AUTH:authorized, TEK:operational",
-                "dhcp": "Success",
-                "downloadCfg": "Success",
-                "eaeStatus": "Secret",
-                "findDownstream": "Success",
-                "hwInit": "Success",
-                "networkAccess": "Permitted",
-                "ranging": "Success",
-                "registration": "Success",
-                "timeOfday": "Secret",
-                "trafficStatus": "Enable",
-            }
-        ],
-        "dsinfo": [
-            {
-                "channelId": "9",
-                "frequency": "426250000",
-                "modulation": "2",
-                "portId": "1",
-                "signalStrength": "17.400",
-                "snr": "40.946",
-            },
-            {
-                "channelId": "14",
-                "frequency": "5030",
-                "modulation": "9",
-                "portId": "2",
-                "signalStrength": "11.030",
-                "snr": "13.243",
-            },
-        ],
-        "usinfo": [
-            {
-                "bandwidth": "6400000",
-                "channelId": "2",
-                "frequency": "39400000",
-                "portId": "1",
-                "scdmaMode": "ATDMA",
-                "signalStrength": "36.000",
-            },
-            {
-                "bandwidth": "18",
-                "channelId": "13",
-                "frequency": "250",
-                "portId": "2",
-                "scdmaMode": "QFSP28",
-                "signalStrength": "40.030",
-            },
-        ],
-    }
-
-    for name, payload in data.items():
-
-        def make_data_handler(name, payload):
-            """
-            Binds name, payload to the values that they were when make_data_handler is
-            called. "This happens because [name, payload are] not local to
-            [data_handler], but [are] defined in the outer scope, and [they are]
-            accessed when [data_handler] is called — not when it is defined." and "In
-            order to avoid this, you need to save the values in variables local to
-            [make_data_handler], so that they don’t rely on the value of the [variables
-            within the outer scope]". Explanation adapted from:
-            <https://docs.python.org/3/faq/programming.html#why-do-lambdas-defined-in-a-loop-with-different-values-all-return-the-same-result>
-            """
-
-            def data_handler(request: Request) -> Response:
-                assert request.cookies.get("session") == "sessionid"
-                return Response(json.dumps(payload), content_type="application/json")
-
-            return data_handler
-
-        httpserver.expect_request(
-            f"/data/{name}.asp", method="GET"
-        ).respond_with_handler(make_data_handler(name, payload))
-
-    def logout_handler(request: Request) -> Response:
-        assert request.cookies.get("session") == "sessionid"
-        assert request.form.get("data") == "byebye"  # observed behaviour
-        # Observed behaviour: preSession cookie is set to a different value in this
-        # response; but to implement that, we'd have to make this into a stateful web
-        # server.
-        return Response(
-            status=302,
-            headers={
-                "Location": httpserver.url_for("/login.html"),
-            },
-        )
-
-    httpserver.expect_request("/goform/logout", method="POST").respond_with_handler(
-        logout_handler
-    )
-
     return httpserver
 
 
-def test_probe(container, hitron_cert, hitron_server):
+def test_probe(container, rsync_net_server):
     # given:
-    cert_der = ssl.PEM_cert_to_DER_cert(
-        hitron_cert.cert_chain_pems[0].bytes().decode("ascii")
-    )
-    digest = hashlib.sha256(cert_der).digest()
-    fingerprint = binascii.hexlify(digest, ":").decode("ascii")
-
-    http = urllib3.PoolManager(retries=False)
     url = f"http://{container[0]}:{container[1]}/probe"
+    target = f"https://www.rsync.net:{rsync_net_server.port}/rss.xml"
 
     # when:
-    r = http.request(
-        "GET",
-        url,
-        fields={
-            "target": "10.0.2.2",
-            "fingerprint": fingerprint,
-            "_port": str(hitron_server.port),
-            "usr": "uuu",
-            "pwd": "ppp",
-        },
-    )
-    # breakpoint()
+    r = requests.get(url, params={"target": target})
 
     # then:
-    hitron_server.check()
-    assert r.status == 200
+    rsync_net_server.check()
+    r.raise_for_status()
