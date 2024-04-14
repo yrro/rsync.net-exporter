@@ -1,1 +1,2 @@
 FLASK_APP=rsync_net_exporter:create_app
+PYTHONDEVMODE=1
