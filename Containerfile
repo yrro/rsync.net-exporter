@@ -63,7 +63,8 @@ WORKDIR /opt/app-root
 COPY --from=builder /opt/app-root/venv venv
 
 ENV \
-  PYTHONUNBUFFERED=1
+  PYTHONUNBUFFERED=1 \
+  PYTHONFAULTHANDLER=1
 
 ADD gunicorn.conf.py .
 
