@@ -33,12 +33,6 @@ repos:
   - id: pylint
     name: pylint
     entry: poetry run pylint
-    args:
-    - --jobs=0
-    - --reports=no
-    - --score=no
-    - --py-version=3.9
-    - --disable=C,line-too-long,missing-function-docstring,missing-class-docstring,missing-module-docstring
     language: system
     types:
     - python

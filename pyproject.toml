@@ -39,6 +39,14 @@ production = ["gunicorn", "setproctitle"]
 strict = true
 packages = "rsync_net_exporter"
 
+[tool.pylint.'MESSAGES CONTROL']
+jobs = 0
+reports = false
+score = false
+py-version = 3.9
+disable= "line-too-long, missing-function-docstring, missing-class-docstring, missing-module-docstring"
+
+
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",
