@@ -20,6 +20,11 @@ def probe() -> ResponseReturnValue:
     if not (target := request.args.get("target")):
         return "Missing parameter: 'target'", 400
 
+    netloc = urlsplit(target).netloc
+    host, sep, port = netloc.partition(":")  # pylint: disable=unused-variable
+    if host != "www.rsync.net":
+        return "'target' points to forbidden host", 403
+
     collector = Collector(target)
 
     reg = prometheus_client.CollectorRegistry()
@@ -66,8 +71,6 @@ class Collector(prometheus_client.registry.Collector):
         )
 
     def collect(self) -> Iterator[prometheus_client.Metric]:
-        self.raise_for_netloc()
-
         resp = requests.get(self.__target, timeout=5)
         resp.raise_for_status()
 
@@ -91,12 +94,6 @@ class Collector(prometheus_client.registry.Collector):
         yield self.__mf_snap_used_free
         yield self.__mf_snap_used_custom
         yield self.__mf_idle
-
-    def raise_for_netloc(self) -> None:
-        netloc = urlsplit(self.__target).netloc
-        host, sep, port = netloc.partition(":")
-        if host != "www.rsync.net":
-            raise Exception("NO")
 
     def collect_account(self, item: ET.Element) -> None:
         labelvalues = []
