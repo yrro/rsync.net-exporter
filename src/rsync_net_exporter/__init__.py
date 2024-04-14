@@ -9,10 +9,14 @@ from . import (
 )
 
 
-def create_app() -> Flask:
-    log_config.config_early()
+def create_app(host: log_config.Host | None = None) -> Flask:
+    log_config.config_early(host)
 
     app = Flask(__name__)
+
+    app.config.from_object(f"{__name__}.default_settings")
+    app.config.from_prefixed_env()
+
     app.register_blueprint(exporter.exporter)
 
     metrics = PrometheusMetrics(app)
