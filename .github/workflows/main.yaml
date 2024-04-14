@@ -51,7 +51,7 @@ jobs:
     - name: Build container image
       uses: redhat-actions/buildah-build@v2
       with:
-        image: localhost/hitron-exporter
+        image: localhost/rsync.net-exporter
         containerfiles: Containerfile
         labels: |
           org.opencontainers.image.created=${{ steps.rfc_5322.outputs.date }}
@@ -66,7 +66,7 @@ jobs:
 
     - name: Extract base image from image
       id: image_base_ref
-      run: echo ref=$(buildah inspect --type=image localhost/hitron-exporter | jq '[.History[] | select((.comment // "") | startswith("FROM "))] | first | .comment[5:]' -r) >> $GITHUB_OUTPUT
+      run: echo ref=$(buildah inspect --type=image localhost/rsync.net-exporter | jq '[.History[] | select((.comment // "") | startswith("FROM "))] | first | .comment[5:]' -r) >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Extract digest from base image
@@ -75,7 +75,7 @@ jobs:
       shell: bash
 
     - name: Create working container
-      run: buildah from --pull=false --name=w localhost/hitron-exporter # github's image's buildah is too old to support --pull=never; regardless the use of localhost will also prevent pulling
+      run: buildah from --pull=false --name=w localhost/rsync.net-exporter # github's image's buildah is too old to support --pull=never; regardless the use of localhost will also prevent pulling
       shell: bash
 
     - name: Apply additional image labels
@@ -87,13 +87,13 @@ jobs:
       shell: bash
 
     - name: Commit working container
-      run: buildah commit w ghcr.io/yrro/hitron-exporter
+      run: buildah commit w ghcr.io/yrro/rsync.net-exporter
       shell: bash
 
     - name: Push image
       uses: redhat-actions/push-to-registry@v2
       with:
-        tags: ghcr.io/yrro/hitron-exporter:latest
+        tags: ghcr.io/yrro/rsync.net-exporter:latest
         username: _ignored_
         password: ${{ secrets.GITHUB_TOKEN }}
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master' # NOT a security check!
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' # NOT a security check!
