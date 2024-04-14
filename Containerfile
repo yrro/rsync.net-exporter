@@ -44,6 +44,8 @@ RUN python3 -m build -w
 
 RUN /opt/app-root/venv/bin/python3 -m pip install --no-deps dist/*.whl
 
+RUN /opt/app-root/venv/bin/python3 -m pip uninstall -y pip setuptools
+
 # In the second stage, a minimal set of OS packages required to run the
 # application is installed, and then the venv is copied from the 'builder'
 # container.
