@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Iterator
 from urllib.parse import urlsplit
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec
 
 from flask import Blueprint, request
 from flask.typing import ResponseReturnValue
@@ -71,7 +71,7 @@ class Collector(prometheus_client.registry.Collector):
         resp = requests.get(self.__target, timeout=5)
         resp.raise_for_status()
 
-        root = ET.fromstring(resp.text)
+        root = ET.fromstring(resp.text)  # nosec
         if root.tag != "rss":
             raise Exception(f"Got XML but with unexpected root element {root.tag!r}")
 
