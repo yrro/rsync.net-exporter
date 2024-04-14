@@ -60,16 +60,14 @@ RUN \
 
 WORKDIR /opt/app-root
 
-COPY --from=builder /opt/app-root/venv /opt/app-root/venv
+COPY --from=builder /opt/app-root/venv venv
 
 ENV \
   PYTHONUNBUFFERED=1
 
 ADD gunicorn.conf.py .
 
-CMD [ \
-  "/opt/app-root/venv/bin/gunicorn" \
-]
+CMD ["venv/bin/gunicorn"]
 
 EXPOSE 9770
 
