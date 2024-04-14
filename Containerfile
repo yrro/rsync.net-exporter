@@ -63,12 +63,12 @@ WORKDIR /opt/app-root
 COPY --from=builder /opt/app-root/venv /opt/app-root/venv
 
 ENV \
-  PYTHONUNBUFFERED=1 \
-  GUNICORN_CMD_ARGS="-b 0.0.0.0:9770 --access-logfile=-"
+  PYTHONUNBUFFERED=1
+
+ADD gunicorn.conf.py .
 
 CMD [ \
-  "/opt/app-root/venv/bin/gunicorn", \
-  "rsync_net_exporter:create_app()" \
+  "/opt/app-root/venv/bin/gunicorn" \
 ]
 
 EXPOSE 9770
