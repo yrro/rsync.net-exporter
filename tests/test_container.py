@@ -86,7 +86,9 @@ def container(ca):
                         logger.info("%s", line)
                 logger.info("----- END CONTAINER LOGS ----")
             finally:
-                subprocess.run(["podman", "stop", ctr], stdout=subprocess.DEVNULL, check=True)
+                subprocess.run(
+                    ["podman", "stop", ctr], stdout=subprocess.DEVNULL, check=True
+                )
 
 
 def test_metrics(container):
@@ -107,7 +109,7 @@ def rsync_net_server(httpserver):
     --log-level=DEBUG.
     """
     httpserver.expect_request("/rss.xml", method="GET").respond_with_data(
-"""\
+        """\
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
  <channel>
