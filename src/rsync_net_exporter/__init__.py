@@ -1,4 +1,5 @@
 from importlib import metadata
+from typing import Optional
 
 from flask import Flask
 from prometheus_flask_exporter import PrometheusMetrics  # type: ignore [import-untyped]
@@ -9,7 +10,7 @@ from . import (
 )
 
 
-def create_app(host: log_config.Host | None = None) -> Flask:
+def create_app(host: Optional[log_config.Host] = None) -> Flask:
     log_config.config_early(host)
 
     app = Flask(__name__)
