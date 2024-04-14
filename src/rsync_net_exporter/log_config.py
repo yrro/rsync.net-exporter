@@ -1,6 +1,7 @@
 import enum
-from logging import INFO, DEBUG, basicConfig, getLogger, getLevelName
+from logging import INFO, DEBUG, basicConfig, getLogger
 import os
+from typing import Optional
 
 
 logger = getLogger(__name__)
@@ -17,38 +18,30 @@ class Host(enum.Enum):
     def detect(cls) -> "Host":
         if getLogger("gunicorn.error").handlers:
             return Host.GUNICORN
-        elif "FLASK_RUN_FROM_CLI" in os.environ:
+        if "FLASK_RUN_FROM_CLI" in os.environ:
             return Host.FLASK
-        else:
-            return Host.UNKNOWN
+        return Host.UNKNOWN
+
+    def get_level(self) -> Optional[int]:
+        if self == Host.UNKNOWN:
+            return INFO
+        if self == Host.FLASK:
+            return DEBUG if int(os.environ.get("FLASK_DEBUG", "0")) else INFO
+        if self == Host.GUNICORN:
+            return getLogger("gunicorn.error").level
+        return None
 
 
-def config_early(host: Host | None = None) -> None:
+def config_early(host: Optional[Host] = None) -> None:
     """
     Configure logging before anyone else has a chance. Try to obtain log level
     from our host environment.
     """
 
-    host = host if host else Host.detect()
+    if host is None:
+        host = Host.detect()
 
-    if host == Host.GUNICORN:
-        level = getLogger("gunicorn.error").level
-    elif host == Host.FLASK:
-        if int(os.environ.get("FLASK_DEBUG", "0")):
-            level = DEBUG
-        else:
-            level = INFO
-    elif host == Host.PYTEST:
-        level = None
-    elif host == Host.UNKNOWN:
-        level = INFO
-
-    if level is not None:
+    if level := host.get_level():
         basicConfig(level=level)
 
-    if host == Host.UNKNOWN:
-        logger.warning("Unknown host environment; defaulting log level to INFO")
-    else:
-        logger.debug(
-            "Host environment: %s; log level: %s", host.name, getLevelName(level)
-        )
+    logger.debug("Host environment: %s", host.name)
