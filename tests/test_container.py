@@ -2,16 +2,27 @@ import logging
 import os
 import ssl
 import subprocess
-import time
 
 import pytest
 import requests
 import trustme
+import urllib3
 
 
 pytestmark = pytest.mark.container
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture()
+def session():
+    retries = urllib3.util.Retry(
+        connect=3,
+        backoff_factor=0.1,
+    )
+    sess = requests.Session()
+    sess.mount("https://", requests.adapters.HTTPAdapter(max_retries=retries))
+    return sess
 
 
 @pytest.fixture(scope="session")
@@ -66,9 +77,6 @@ def container(ca):
             host, sep, port_ = p2.stdout.rstrip().partition(":")
             addr = (host, int(port_))
 
-            # XXX no better way to wait for conatiner readiness?
-            time.sleep(2)
-
             yield addr
         finally:
             try:
@@ -89,12 +97,12 @@ def container(ca):
                 )
 
 
-def test_metrics(container):
+def test_metrics(container, session):
     # given:
     url = f"http://{container[0]}:{container[1]}/metrics"
 
     # when:
-    r = requests.get(url, timeout=2)
+    r = session.get(url, timeout=2)
 
     # then:
     r.raise_for_status()
@@ -160,13 +168,13 @@ def rsync_net_server(httpserver):
     return httpserver
 
 
-def test_probe(container, rsync_net_server):
+def test_probe(container, rsync_net_server, session):
     # given:
     url = f"http://{container[0]}:{container[1]}/probe"
     target = f"https://www.rsync.net:{rsync_net_server.port}/rss.xml"
 
     # when:
-    r = requests.get(url, params={"target": target}, timeout=2)
+    r = session.get(url, params={"target": target}, timeout=2)
 
     # then:
     rsync_net_server.check()
