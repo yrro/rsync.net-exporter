@@ -133,11 +133,14 @@ Run the tests:
 $ poetry run pytest
 ```
 
-Before your first commit, install [pre-commit](https://pre-commit.com/) and run
-`pre-commit install`; this will configure your clone to run a variety of checks
-and you'll only be able to commit if they pass. If they don't work on your
-machine for some reason you can tell Git to let you commit anyway with `git
-commit -n`.
+## Before committing
+
+Install [pre-commit](https://pre-commit.com/) and run `pre-commit install`;
+this will configure your clone to run a variety of checks and you'll only be
+able to commit if they pass.
+
+If they don't work on your machine for some reason you can tell Git to let you
+commit anyway with `git commit -n`.
 
 ## Building the container image
 
