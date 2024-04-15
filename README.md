@@ -160,7 +160,7 @@ or
 $ docker build -t rsync.net-exporter -f Containerfile .
 ```
 
-Test the container image:
+Test the container image (with `podman`):
 
 ```
 $ poetry run pytest --suite=container
