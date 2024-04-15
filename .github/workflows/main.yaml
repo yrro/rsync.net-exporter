@@ -1,4 +1,4 @@
-name: Build & publish container image
+name: Unit tests, build & publish container image
 
 on:
 
