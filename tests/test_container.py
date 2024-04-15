@@ -168,7 +168,7 @@ def test_probe(container, rsync_net_server):
     target = f"https://www.rsync.net:{rsync_net_server.port}/rss.xml"
 
     # when:
-    r = requests.get(url, params={"target": target})
+    r = requests.get(url, params={"target": target}, timeout=2)
 
     # then:
     rsync_net_server.check()
