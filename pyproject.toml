@@ -59,7 +59,7 @@ addopts = [
     "-m", "not container",
 ]
 markers = [
-    "container: tests a built container image"
+    "container: include tests in container rest suite"
 ]
 testpaths = ["tests"]
 
