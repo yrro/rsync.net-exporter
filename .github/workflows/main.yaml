@@ -9,7 +9,9 @@ on:
 jobs:
 
   main:
+
     runs-on: ubuntu-latest
+
     permissions:
       packages: write
       contents: read
@@ -36,6 +38,10 @@ jobs:
 
     - name: Bump version number
       run: poetry version "${{ steps.pep_440.outputs.version }}"
+      shell: bash
+
+    - name: Update Poetry lock file
+      run: poetry lock --no-update
       shell: bash
 
     - name: Install dependencies
