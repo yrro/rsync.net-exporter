@@ -85,6 +85,13 @@ jobs:
       shell: bash
       if: always()
 
+    - name: Upload merged test results
+      uses: actions/upload-artifact@v4
+      with:
+        name: JUnit merged results
+        path: junit.xml
+      if: always()
+
     - name: Publish test results
       uses: pmeier/pytest-results-action@v0.6.0
       with:
