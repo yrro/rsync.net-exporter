@@ -6,6 +6,10 @@ on:
 
   push:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   main:
@@ -39,28 +43,22 @@ jobs:
     - name: Construct PEP 440 version identifier
       id: pep_440
       run: echo version=$(git describe --match='version-marker' | sed -e s/version-marker-/${{ steps.orig_version.outputs.version }}/ -e s/-g/+git./) >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Bump version number
       run: poetry version "${{ steps.pep_440.outputs.version }}"
-      shell: bash
 
     - name: Update Poetry lock file
       run: poetry lock --no-update
-      shell: bash
 
     - name: Install dependencies
       run: poetry install --with=dev,github-actions
-      shell: bash
 
     - name: Run unit tests
       run: poetry run pytest --junit-xml=junit-default.xml
-      shell: bash
 
     - name: Record build timestamp
       id: rfc_3339
       run: echo date=$(date --rfc-3339=seconds) >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Build container image
       uses: redhat-actions/buildah-build@v2
@@ -76,14 +74,12 @@ jobs:
 
     - name: Run container tests
       run: poetry run pytest --suite=container --junit-xml=junit-container.xml
-      shell: bash
 
     - name: Merge test results
       run: |
         if find -name 'junit-*.xml' -quit 2>/dev/null; then
           poetry run junitparser merge junit-*.xml junit.xml
         fi
-      shell: bash
       if: always()
 
     - name: Upload merged test results
@@ -105,16 +101,13 @@ jobs:
     - name: Extract base image from image
       id: image_base_ref
       run: echo ref=$(buildah inspect --type=image localhost/rsync.net-exporter | jq '[.History[] | select((.comment // "") | startswith("FROM "))] | first | .comment[5:]' -r) >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Extract digest from base image
       id: image_base_digest
       run: echo digest=$(buildah inspect --type=image ${{ steps.image_base_ref.outputs.ref }} | jq '.FromImageDigest' -r) >> $GITHUB_OUTPUT
-      shell: bash
 
     - name: Create working container
       run: buildah from --pull=false --name=w localhost/rsync.net-exporter # github's image's buildah is too old to support --pull=never; regardless the use of localhost will also prevent pulling
-      shell: bash
 
     - name: Apply additional image labels
       run: |
@@ -122,11 +115,9 @@ jobs:
           --label org.opencontainers.image.base.name=${{ steps.image_base_ref.outputs.ref }} \
           --label org.opencontainers.image.base.digest=${{ steps.image_base_digest.outputs.digest }} \
           w
-      shell: bash
 
     - name: Commit working container
       run: buildah commit w ghcr.io/yrro/rsync.net-exporter
-      shell: bash
 
     - name: Push image
       uses: redhat-actions/push-to-registry@v2

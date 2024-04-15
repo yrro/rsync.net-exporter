@@ -6,6 +6,10 @@ on:
 
   push:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   pre-commit:
