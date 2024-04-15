@@ -164,3 +164,31 @@ def test_collector_snap_custom_empty(requests_mock, name, value):
             value=value,
         )
     ]
+
+
+def test_collector_raises_for_unrecognized_root_element(requests_mock):
+    # given:
+    url = "https://rsync.example.net/blah.xml"
+    requests_mock.get(
+        url, text='<?xml version="1.0" encoding="utf-8"?>\n<hello version="2.0"/>'
+    )
+    col = collector.Collector(url)
+
+    # then:
+    with pytest.raises(collector.CollectorException):
+        # when:
+        list(col.collect())
+
+
+def test_collector_raises_for_empty_rss_document(requests_mock):
+    # given:
+    url = "https://rsync.example.net/blah.xml"
+    requests_mock.get(
+        url, text='<?xml version="1.0" encoding="utf-8"?>\n<rss version="2.0"/>'
+    )
+    col = collector.Collector(url)
+
+    # then:
+    with pytest.raises(collector.CollectorException):
+        # when:
+        list(col.collect())

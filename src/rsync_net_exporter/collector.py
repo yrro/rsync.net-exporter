@@ -60,12 +60,17 @@ class Collector(
                 f"Got XML but with unexpected root element {root.tag!r}"
             )
 
+        nitems = 0
         for item in root.iterfind("channel/item"):
             if not item.findtext("uid"):
                 logger.debug("Skipping item %r", item.findtext("title"))
                 continue
 
+            nitems += 1
             self.collect_account(item)
+
+        if nitems == 0:
+            raise CollectorException("Got RSS without any /rss/channel/item elements")
 
         yield self.__mf_quota
         yield self.__mf_billed
