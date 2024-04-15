@@ -53,7 +53,7 @@ If you're not into containers, you need [Poetry](https://python-poetry.org/)
 which will take care of creating a venv, installing dependencies, etc.
 
 ```
-$ poetry install --only=main
+$ poetry install --only=main --extras=production
 
 $ poetry run gunicorn
 ```
