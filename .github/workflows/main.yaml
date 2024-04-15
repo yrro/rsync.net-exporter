@@ -73,7 +73,7 @@ jobs:
           org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
 
     - name: Run container tests
-      run: poetry run pytest --suite=container --junit-xml=junit-container.xml
+      run: poetry run pytest -m container --junit-xml=junit-container.xml
 
     - name: Merge test results
       run: |

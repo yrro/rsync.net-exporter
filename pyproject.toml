@@ -21,7 +21,6 @@ types-urllib3 = "^1.26.25.6"
 pylint = "^3.1.0"
 pytest = "^8.1.1"
 pytest-github-actions-annotate-failures = "^0.2.0"
-pytest-pilot = "^0.8.0"
 types-requests = "^2.31.0.20240406"
 requests-mock = "^1.12.1"
 trustme = "^1.1.0"
@@ -56,10 +55,11 @@ disable= "line-too-long, missing-function-docstring, missing-class-docstring, mi
 [tool.pytest.ini_options]
 addopts = [
     "--import-mode=importlib",
+    "--strict-markers",
+    "-m", "not container",
 ]
-filterwarnings = [
-    # <https://github.com/smarie/python-pytest-pilot/issues/19>
-    "ignore:A private pytest class or function was used:pytest.PytestDeprecationWarning"
+markers = [
+    "container: tests a built container image"
 ]
 testpaths = ["tests"]
 

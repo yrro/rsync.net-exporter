@@ -8,10 +8,8 @@ import pytest
 import requests
 import trustme
 
-from .conftest import suite
 
-
-pytestmark = suite("container")
+pytestmark = pytest.mark.container
 
 logger = logging.getLogger(__name__)
 

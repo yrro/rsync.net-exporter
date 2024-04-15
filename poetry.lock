@@ -1319,17 +1319,6 @@ files = [
 Werkzeug = ">=2.0.0"
 
 [[package]]
-name = "pytest-pilot"
-version = "0.8.0"
-description = "Slice in your test base thanks to powerful markers."
-optional = false
-python-versions = "*"
-files = [
-    {file = "pytest-pilot-0.8.0.tar.gz", hash = "sha256:ebd654c02ccf6db4ae982896a74536a025819479a77049c8815f9a712499eb96"},
-    {file = "pytest_pilot-0.8.0-py2.py3-none-any.whl", hash = "sha256:9a420a2a3ca111c1a7bc8ba68762d2f91282a483805ffdbceb1e8c5b8eacdc95"},
-]
-
-[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -1702,4 +1691,4 @@ production = ["gunicorn", "setproctitle"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7f0c4f255279ae041beb43ab061bc922bac5944e117da89e9c8b9e37d6de964f"
+content-hash = "db8941ff24e952a23b4f7bf6ff1a44b2e49ef8be50b17623836adb414fed50d0"
