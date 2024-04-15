@@ -73,6 +73,7 @@ Sample `prometheus.yml` snippet:
 
 ```yaml
 scrape_configs:
+
 - job_name: rsync.net
   scrape_interval: 15s
   metrics_path: /probe
