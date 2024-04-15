@@ -46,7 +46,7 @@ rsyncnet_account_idle_seconds{location="CH",nickname="",uid="lp5570"} 0.0
 If you're into containers:
 
 ```
-$ podman run --name rsync.net-exporter --net=host --rm --replace --host=net ghcr.io/yrro/rsync.net-exporter
+$ podman run --name ghcr.io/yrro/rsync.net-exporter --net=host --rm --replace --host=net ghcr.io/yrro/rsync.net-exporter
 ```
 
 If you're not into containers, you need [Poetry](https://python-poetry.org/)
@@ -104,7 +104,7 @@ baked in to the container image. For instance, to change the exporter's port
 number:
 
 ```
-$ podman run --name rsync.net-exporter --net=host --rm --replace ghcr.io/yrro/hitron-exporter:latest --bind-address='0.0.0.0:1521'
+$ podman run --name ghcr.io/yrro/rsync.net-exporter --net=host --rm --replace ghcr.io/yrro/hitron-exporter:latest --bind-address='0.0.0.0:1521'
 ```
 
 ## How to develop
