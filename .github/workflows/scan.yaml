@@ -16,4 +16,4 @@ jobs:
 
     - uses: azure/container-scan@v0
       with:
-        image-name: ghcr.io/yrro/hitron-exporter:latest
+        image-name: ghcr.io/yrro/rsync.net-exporter:latest
