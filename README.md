@@ -105,7 +105,7 @@ baked in to the container image. For instance, to change the exporter's port
 number:
 
 ```
-$ podman run --name ghcr.io/yrro/rsync.net-exporter --net=host --rm --replace ghcr.io/yrro/hitron-exporter:latest --bind-address='0.0.0.0:1521'
+$ podman run --name ghcr.io/yrro/rsync.net-exporter --net=host --rm --replace --host=net ghcr.io/yrro/hitron-exporter:latest --bind-address='0.0.0.0:1521'
 ```
 
 ## How to develop
