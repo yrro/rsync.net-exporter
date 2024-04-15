@@ -48,10 +48,18 @@ repos:
     types:
     - python
 
+  - id: pip-audit
+    name: pip-audit
+    entry: poetry run pip-audit --skip-editable --ignore-vuln=PYSEC-2023-242 --desc=on
+    language: system
+    files: ^poetry\.lock$
+    pass_filenames: false
+
 
 - repo: https://github.com/python-poetry/poetry
   rev: 1.8.2
   hooks:
+
   - id: poetry-check
   - id: poetry-lock
     args:
