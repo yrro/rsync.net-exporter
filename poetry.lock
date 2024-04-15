@@ -133,6 +133,17 @@ files = [
 pycparser = "*"
 
 [[package]]
+name = "chardet"
+version = "5.2.0"
+description = "Universal encoding detector for Python 3"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "chardet-5.2.0-py3-none-any.whl", hash = "sha256:e1cf59446890a00105fe7b7912492ea04b6e6f06d4b742b2c788469e34c82970"},
+    {file = "chardet-5.2.0.tar.gz", hash = "sha256:1b3b6ff479a8c414bc3fa2c0852995695c4a026dcd6d0633b2dd092ca39c1cf7"},
+]
+
+[[package]]
 name = "charset-normalizer"
 version = "3.3.2"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
@@ -398,6 +409,25 @@ sortedcontainers = ">=2.4.0,<3.0.0"
 json-validation = ["jsonschema[format] (>=4.18,<5.0)"]
 validation = ["jsonschema[format] (>=4.18,<5.0)", "lxml (>=4,<6)"]
 xml-validation = ["lxml (>=4,<6)"]
+
+[[package]]
+name = "dataproperty"
+version = "1.0.1"
+description = "Python library for extract property from data."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "DataProperty-1.0.1-py3-none-any.whl", hash = "sha256:0b8b07d4fb6453fcf975b53d35dea41f3cfd69c9d79b5010c3cf224ff0407a7a"},
+    {file = "DataProperty-1.0.1.tar.gz", hash = "sha256:723e5729fa6e885e127a771a983ee1e0e34bb141aca4ffe1f0bfa7cde34650a4"},
+]
+
+[package.dependencies]
+mbstrdecoder = ">=1.0.0,<2"
+typepy = {version = ">=1.2.0,<2", extras = ["datetime"]}
+
+[package.extras]
+logging = ["loguru (>=0.4.1,<1)"]
+test = ["pytest (>=6.0.1)", "pytest-md-report (>=0.3)", "tcolorpy (>=0.1.2)"]
 
 [[package]]
 name = "defusedxml"
@@ -752,6 +782,23 @@ files = [
 ]
 
 [[package]]
+name = "mbstrdecoder"
+version = "1.1.3"
+description = "mbstrdecoder is a Python library for multi-byte character string decoder"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "mbstrdecoder-1.1.3-py3-none-any.whl", hash = "sha256:d66c1ed3f2dc4e7c5d87cd44a75be10bc5af4250f95b38bbaedd7851308ce938"},
+    {file = "mbstrdecoder-1.1.3.tar.gz", hash = "sha256:dcfd2c759322eb44fe193a9e0b1b86c5b87f3ec5ea8e1bb43b3e9ae423f1e8fe"},
+]
+
+[package.dependencies]
+chardet = ">=3.0.4,<6"
+
+[package.extras]
+test = ["Faker (>=1.0.2)", "pytest (>=6.0.1)", "pytest-md-report (>=0.1)"]
+
+[[package]]
 name = "mccabe"
 version = "0.7.0"
 description = "McCabe checker, plugin for flake8"
@@ -1024,6 +1071,21 @@ files = [
 ]
 
 [[package]]
+name = "pathvalidate"
+version = "3.2.0"
+description = "pathvalidate is a Python library to sanitize/validate a string such as filenames/file-paths/etc."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pathvalidate-3.2.0-py3-none-any.whl", hash = "sha256:cc593caa6299b22b37f228148257997e2fa850eea2daf7e4cc9205cef6908dee"},
+    {file = "pathvalidate-3.2.0.tar.gz", hash = "sha256:5e8378cf6712bff67fbe7a8307d99fa8c1a0cb28aa477056f8fc374f0dff24ad"},
+]
+
+[package.extras]
+docs = ["Sphinx (>=2.4)", "sphinx-rtd-theme (>=1.2.2)", "urllib3 (<2)"]
+test = ["Faker (>=1.0.8)", "allpairspy (>=2)", "click (>=6.2)", "pytest (>=6.0.1)", "pytest-discord (>=0.1.4)", "pytest-md-report (>=0.4.1)"]
+
+[[package]]
 name = "pip"
 version = "24.0"
 description = "The PyPA recommended tool for installing Python packages."
@@ -1251,6 +1313,42 @@ files = [
 ]
 
 [[package]]
+name = "pytablewriter"
+version = "1.2.0"
+description = "pytablewriter is a Python library to write a table in various formats: AsciiDoc / CSV / Elasticsearch / HTML / JavaScript / JSON / LaTeX / LDJSON / LTSV / Markdown / MediaWiki / NumPy / Excel / Pandas / Python / reStructuredText / SQLite / TOML / TSV / YAML."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pytablewriter-1.2.0-py3-none-any.whl", hash = "sha256:4a30e2bb4bf5bc1069b1d2b2bc41947577c4517ab0875b23a5b194d296f543d8"},
+    {file = "pytablewriter-1.2.0.tar.gz", hash = "sha256:0204a4bb684a22140d640f2599f09e137bcdc18b3dd49426f4a555016e246b46"},
+]
+
+[package.dependencies]
+DataProperty = ">=1.0.1,<2"
+mbstrdecoder = ">=1.0.0,<2"
+pathvalidate = ">=2.3.0,<4"
+setuptools = ">=38.3.0"
+tabledata = ">=1.3.1,<2"
+tcolorpy = ">=0.0.5,<1"
+typepy = {version = ">=1.3.2,<2", extras = ["datetime"]}
+
+[package.extras]
+all = ["PyYAML (>=3.11,<7)", "SimpleSQLite (>=1.3.2,<2)", "XlsxWriter (>=0.9.6,<4)", "dominate (>=2.1.5,<3)", "elasticsearch (>=8.0.1,<9)", "loguru (>=0.4.1,<1)", "pandas (>=0.25.3,<3)", "pytablereader (>=0.31.3,<2)", "pytablewriter-altcol-theme (>=0.1.0,<1)", "pytablewriter-altrow-theme (>=0.2.0,<1)", "simplejson (>=3.8.1,<4)", "toml (>=0.9.3,<1)", "xlwt"]
+docs = ["PyYAML (>=3.11,<7)", "SimpleSQLite (>=1.3.2,<2)", "Sphinx (>=2.4)", "XlsxWriter (>=0.9.6,<4)", "dominate (>=2.1.5,<3)", "elasticsearch (>=8.0.1,<9)", "loguru (>=0.4.1,<1)", "pandas (>=0.25.3,<3)", "pytablereader (>=0.31.3,<2)", "pytablewriter-altcol-theme (>=0.1.0,<1)", "pytablewriter-altrow-theme (>=0.2.0,<1)", "simplejson (>=3.8.1,<4)", "sphinx-rtd-theme (>=1.2.2)", "toml (>=0.9.3,<1)", "xlwt"]
+es = ["elasticsearch (>=8.0.1,<9)"]
+es8 = ["elasticsearch (>=8.0.1,<9)"]
+excel = ["XlsxWriter (>=0.9.6,<4)", "xlwt"]
+from = ["pytablereader (>=0.31.3,<2)"]
+html = ["dominate (>=2.1.5,<3)"]
+logging = ["loguru (>=0.4.1,<1)"]
+pandas = ["pandas (>=0.25.3,<3)"]
+sqlite = ["SimpleSQLite (>=1.3.2,<2)"]
+test = ["PyYAML (>=3.11,<7)", "SimpleSQLite (>=1.3.2,<2)", "XlsxWriter (>=0.9.6,<4)", "beautifulsoup4 (>=4.10)", "dominate (>=2.1.5,<3)", "elasticsearch (>=8.0.1,<9)", "loguru (>=0.4.1,<1)", "pandas (>=0.25.3,<3)", "pytablereader (>=0.31.3,<2)", "pytablereader[excel,sqlite] (>=0.31.3)", "pytablewriter-altcol-theme (>=0.1.0,<1)", "pytablewriter-altrow-theme (>=0.2.0,<1)", "pytest (>=6.0.1)", "pytest-md-report (>=0.4.1)", "simplejson (>=3.8.1,<4)", "sqliteschema (>=1.3.0)", "tablib (>=3.2.0)", "toml (>=0.9.3,<1)", "xlwt"]
+theme = ["pytablewriter-altcol-theme (>=0.1.0,<1)", "pytablewriter-altrow-theme (>=0.2.0,<1)"]
+toml = ["toml (>=0.9.3,<1)"]
+yaml = ["PyYAML (>=3.11,<7)"]
+
+[[package]]
 name = "pytest"
 version = "8.1.1"
 description = "pytest: simple powerful testing with Python"
@@ -1305,6 +1403,23 @@ files = [
 pytest = ">=4.0.0"
 
 [[package]]
+name = "pytest-github-report"
+version = "0.0.1"
+description = "Generate a GitHub report using pytest in GitHub Workflows"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytest-github-report-0.0.1.tar.gz", hash = "sha256:5745c3d2ff4c06ca2ef5f043b9c924497d39dc9749e076aa2b5774afb74d8059"},
+]
+
+[package.dependencies]
+pytablewriter = "*"
+pytest = "*"
+
+[package.extras]
+all = ["pytablewriter", "pytest"]
+
+[[package]]
 name = "pytest-httpserver"
 version = "1.0.10"
 description = "pytest-httpserver is a httpserver for pytest"
@@ -1319,6 +1434,20 @@ files = [
 Werkzeug = ">=2.0.0"
 
 [[package]]
+name = "python-dateutil"
+version = "2.9.0.post0"
+description = "Extensions to the standard Python datetime module"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+files = [
+    {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
+    {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
+]
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -1331,6 +1460,17 @@ files = [
 
 [package.extras]
 cli = ["click (>=5.0)"]
+
+[[package]]
+name = "pytz"
+version = "2024.1"
+description = "World timezone definitions, modern and historical"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pytz-2024.1-py2.py3-none-any.whl", hash = "sha256:328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319"},
+    {file = "pytz-2024.1.tar.gz", hash = "sha256:2a29735ea9c18baf14b448846bde5a48030ed267578472d8955cd0e7443a9812"},
+]
 
 [[package]]
 name = "requests"
@@ -1542,6 +1682,39 @@ files = [
 ]
 
 [[package]]
+name = "tabledata"
+version = "1.3.3"
+description = "tabledata is a Python library to represent tabular data. Used for pytablewriter/pytablereader/SimpleSQLite/etc."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tabledata-1.3.3-py3-none-any.whl", hash = "sha256:4abad1c996d8607e23b045b44dc0c5f061668f3c37585302c5f6c84c93a89962"},
+    {file = "tabledata-1.3.3.tar.gz", hash = "sha256:c90daaba9a408e4397934b3ff2f6c06797d5289676420bf520c741ad43e6ff91"},
+]
+
+[package.dependencies]
+DataProperty = ">=1.0.1,<2"
+typepy = ">=1.2.0,<2"
+
+[package.extras]
+logging = ["loguru (>=0.4.1,<1)"]
+test = ["pytablewriter (>=0.46)", "pytest"]
+
+[[package]]
+name = "tcolorpy"
+version = "0.1.4"
+description = "tcolopy is a Python library to apply true color for terminal text."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "tcolorpy-0.1.4-py3-none-any.whl", hash = "sha256:d0926480aa5012f34877d69fc3b670f207dc165674e68ad07458fa6ee5b12724"},
+    {file = "tcolorpy-0.1.4.tar.gz", hash = "sha256:f0dceb1cb95e554cee63024b3cd2fd8d4628c568773de2d1e6b4f0478461901c"},
+]
+
+[package.extras]
+test = ["pytest (>=6.0.1)", "pytest-md-report (>=0.4.1)"]
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -1588,6 +1761,27 @@ files = [
 [package.dependencies]
 cryptography = ">=3.1"
 idna = ">=2.0"
+
+[[package]]
+name = "typepy"
+version = "1.3.2"
+description = "typepy is a Python library for variable type checker/validator/converter at a run time."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "typepy-1.3.2-py3-none-any.whl", hash = "sha256:d5d1022a424132622993800f1d2cd16cfdb691ac4e3b9c325f0fcb37799db1ae"},
+    {file = "typepy-1.3.2.tar.gz", hash = "sha256:b69fd48b9f50cdb3809906eef36b855b3134ff66c8893a4f8580abddb0b39517"},
+]
+
+[package.dependencies]
+mbstrdecoder = ">=1.0.0,<2"
+packaging = {version = "*", optional = true, markers = "extra == \"datetime\""}
+python-dateutil = {version = ">=2.8.0,<3.0.0", optional = true, markers = "extra == \"datetime\""}
+pytz = {version = ">=2018.9", optional = true, markers = "extra == \"datetime\""}
+
+[package.extras]
+datetime = ["packaging", "python-dateutil (>=2.8.0,<3.0.0)", "pytz (>=2018.9)"]
+test = ["packaging", "pytest (>=6.0.1)", "python-dateutil (>=2.8.0,<3.0.0)", "pytz (>=2018.9)", "tcolorpy"]
 
 [[package]]
 name = "types-requests"
@@ -1691,4 +1885,4 @@ production = ["gunicorn", "setproctitle"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "db8941ff24e952a23b4f7bf6ff1a44b2e49ef8be50b17623836adb414fed50d0"
+content-hash = "38b7c61ddb327a19947f33a3df523d8e4524d5a154fed9ebce745edc75979058"

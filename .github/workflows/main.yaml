@@ -54,7 +54,7 @@ jobs:
       run: poetry install --with=dev,github-actions
 
     - name: Run unit tests
-      run: poetry run pytest --junit-xml=junit-default.xml
+      run: poetry run pytest --junit-xml=junit-default.xml --github-report
 
     - name: Record build timestamp
       id: rfc_3339
@@ -73,7 +73,7 @@ jobs:
           org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
 
     - name: Run container tests
-      run: poetry run pytest -m container --junit-xml=junit-container.xml
+      run: poetry run pytest -m container --junit-xml=junit-container.xml --github-report
 
     - name: Merge test results
       run: |
