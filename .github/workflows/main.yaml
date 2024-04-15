@@ -84,6 +84,7 @@ jobs:
       uses: test-summary/action@v2
       with:
         paths: junit-*.xml
+        show: all
       if: always()
 
     - name: Upload merged test results
