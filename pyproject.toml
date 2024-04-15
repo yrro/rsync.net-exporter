@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rsync.net-exporter"
-version = "0.1.0"
+version = "0.1.0.dev"
 description = "A Prometheus exporter for rsync.net"
 authors = ["Sam Morris <sam@robots.org.uk>"]
 
