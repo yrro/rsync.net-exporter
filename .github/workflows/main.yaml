@@ -31,7 +31,7 @@ jobs:
 
     - name: Construct PEP 440 version identifier
       id: pep_440
-      run: echo version=$(git describe --match='version-marker' | sed s/version-marker-/0.1.0.dev/ | sed 's/-g/+git./') >> $GITHUB_OUTPUT
+      run: echo version=$(git describe --match='version-marker' | sed -e s/version-marker-/0.1.0.dev/ -e s/-g/+git./) >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Bump version number
