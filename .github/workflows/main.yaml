@@ -49,11 +49,11 @@ jobs:
       shell: bash
 
     - name: Install dependencies
-      run: poetry install --with=dev
+      run: poetry install --with=dev,github-actions
       shell: bash
 
     - name: Run unit tests
-      run: poetry run pytest --github-report
+      run: poetry run pytest --junit-xml=junit-default.xml
       shell: bash
 
     - name: Record build timestamp
@@ -74,8 +74,25 @@ jobs:
           org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
 
     - name: Run container tests
-      run: poetry run pytest --suite=container --github-report
+      run: poetry run pytest --suite=container --junit-xml=junit-container.xml
       shell: bash
+
+    - name: Merge test results
+      run: |
+        if find -name 'junit-*.xml' -quit 2>/dev/null; then
+          poetry run junitparser merge junit-*.xml junit.xml
+        fi
+      shell: bash
+      if: always()
+
+    - name: Publish test results
+      uses: pmeier/pytest-results-action@v0.6.0
+      with:
+        path: junit.xml
+        summary: true
+        fail-on-empty: false
+        title: pytest results
+      if: always()
 
     - name: Extract base image from image
       id: image_base_ref
