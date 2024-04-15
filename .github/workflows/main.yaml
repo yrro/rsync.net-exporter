@@ -47,8 +47,8 @@ jobs:
       shell: bash
 
     - name: Record build timestamp
-      id: rfc_5322
-      run: echo date=$(date -R) >> $GITHUB_OUTPUT
+      id: rfc_3339
+      run: echo date=$(date --rfc-3339=seconds) >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Build container image
@@ -57,7 +57,7 @@ jobs:
         image: localhost/rsync.net-exporter
         containerfiles: Containerfile
         labels: |
-          org.opencontainers.image.created=${{ steps.rfc_5322.outputs.date }}
+          org.opencontainers.image.created=${{ steps.rfc_3339.outputs.date }}
           org.opencontainers.image.revision=${{ github.sha }}
           org.opencontainers.image.source=${{ github.repositoryUrl }}
           org.opencontainers.image.url=https://github.com/${{ github.repository }}
