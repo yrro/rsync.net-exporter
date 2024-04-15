@@ -1,7 +1,6 @@
 import enum
 from logging import INFO, DEBUG, basicConfig, getLogger
 import os
-from typing import Optional
 
 
 logger = getLogger(__name__)
@@ -22,26 +21,15 @@ class Host(enum.Enum):
             return Host.FLASK
         return Host.UNKNOWN
 
-    def get_level(self) -> Optional[int]:
-        if self == Host.UNKNOWN:
-            return INFO
+    def configure_logging(self) -> None:
+        level = None
+
         if self == Host.FLASK:
-            return DEBUG if int(os.environ.get("FLASK_DEBUG", "0")) else INFO
-        if self == Host.GUNICORN:
-            return getLogger("gunicorn.error").level
-        return None
+            level = DEBUG if int(os.environ.get("FLASK_DEBUG", "0")) else INFO
+        elif self == Host.GUNICORN:
+            level = getLogger("gunicorn.error").level
 
+        if level is not None:
+            basicConfig(level=level)
 
-def config_early(host: Optional[Host] = None) -> None:
-    """
-    Configure logging before anyone else has a chance. Try to obtain log level
-    from our host environment.
-    """
-
-    if host is None:
-        host = Host.detect()
-
-    if level := host.get_level():
-        basicConfig(level=level)
-
-    logger.debug("Host environment: %s", host.name)
+        logger.debug("Host environment: %s", self.name)

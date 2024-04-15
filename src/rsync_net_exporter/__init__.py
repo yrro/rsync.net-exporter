@@ -11,7 +11,10 @@ from . import (
 
 
 def create_app(host: Optional[log_config.Host] = None) -> Flask:
-    log_config.config_early(host)
+    if host is None:
+        host = log_config.Host.detect()
+
+    host.configure_logging()
 
     app = Flask(__name__)
 
