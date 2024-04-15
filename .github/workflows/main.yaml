@@ -51,10 +51,10 @@ jobs:
       run: poetry lock --no-update
 
     - name: Install dependencies
-      run: poetry install --with=dev,github-actions
+      run: poetry install --with=dev
 
     - name: Run unit tests
-      run: poetry run pytest --junit-xml=junit-default.xml --github-report
+      run: poetry run pytest --junit-xml=junit-default.xml
 
     - name: Record build timestamp
       id: rfc_3339
@@ -73,36 +73,13 @@ jobs:
           org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
 
     - name: Run container tests
-      run: poetry run pytest -m container --junit-xml=junit-container.xml --github-report
-
-    - name: Merge test results
-      run: |
-        poetry run junitparser merge junit-*.xml junit.xml
-      if: always()
+      run: poetry run pytest -m container --junit-xml=junit-container.xml
 
     - name: Summarize test results
       uses: test-summary/action@v2
       with:
         paths: junit-*.xml
       if: always()
-
-    - name: Upload merged test results
-      uses: actions/upload-artifact@v4
-      with:
-        name: JUnit merged results
-        path: junit.xml
-      if: always()
-      continue-on-error: true
-
-    - name: Publish test results
-      uses: pmeier/pytest-results-action@v0.6.0
-      with:
-        path: junit.xml
-        summary: true
-        fail-on-empty: false
-        title: pytest results
-      if: always()
-      continue-on-error: true
 
     - name: Extract base image from image
       id: image_base_ref
