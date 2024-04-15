@@ -77,9 +77,7 @@ jobs:
 
     - name: Merge test results
       run: |
-        if find -name 'junit-*.xml' -quit 2>/dev/null; then
-          poetry run junitparser merge junit-*.xml junit.xml
-        fi
+        poetry run junitparser merge junit-*.xml junit.xml
       if: always()
 
     - name: Upload merged test results
@@ -88,6 +86,7 @@ jobs:
         name: JUnit merged results
         path: junit.xml
       if: always()
+      continue-on-error: true
 
     - name: Publish test results
       uses: pmeier/pytest-results-action@v0.6.0
@@ -97,6 +96,7 @@ jobs:
         fail-on-empty: false
         title: pytest results
       if: always()
+      continue-on-error: true
 
     - name: Extract base image from image
       id: image_base_ref
