@@ -133,6 +133,12 @@ Run the tests:
 $ poetry run pytest
 ```
 
+... with test coverage reports:
+
+```
+$ poetry run pytest --cov --cov-report=html
+```
+
 ## Before committing
 
 Install [pre-commit](https://pre-commit.com/) and run `pre-commit install`;
