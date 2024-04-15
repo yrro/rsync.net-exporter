@@ -83,7 +83,7 @@ scrape_configs:
     target_label: __param_target
   - source_labels: [__param_target]
     target_label: instance
-  - replacement: 'localhost:9938'
+  - replacement: 'localhost:9770'
     target_label: __address__
 ```
 
