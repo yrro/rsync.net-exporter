@@ -85,6 +85,10 @@ scrape_configs:
     target_label: instance
   - replacement: 'localhost:9770'
     target_label: __address__
+
+- job_name: meta_rsync.net
+  static_configs:
+  - targets: ['localhost:9770']
 ```
 
 This assumes you're running the exporter on the same machine as Prometheus. If
