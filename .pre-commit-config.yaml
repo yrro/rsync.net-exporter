@@ -21,6 +21,31 @@ repos:
     - --preview
 
 
+- repo: https://github.com/python-poetry/poetry
+  rev: 1.8.2
+  hooks:
+
+  - id: poetry-check
+
+  - id: poetry-lock
+
+
+- repo: https://github.com/PyCQA/bandit
+  rev: 1.7.8
+  hooks:
+  - id: bandit
+    exclude: ^tests/
+    args: ["-c", "pyproject.toml"]
+    additional_dependencies:
+    - bandit[toml]
+
+
+- repo: https://github.com/charliermarsh/ruff-pre-commit
+  rev: 'v0.3.7'
+  hooks:
+  - id: ruff
+
+
 - repo: local
   hooks:
 
@@ -54,30 +79,3 @@ repos:
     language: system
     files: ^poetry\.lock$
     pass_filenames: false
-
-
-- repo: https://github.com/python-poetry/poetry
-  rev: 1.8.2
-  hooks:
-
-  - id: poetry-check
-  - id: poetry-lock
-    args:
-    - --check
-    files: ^pyproject\.toml$
-
-
-- repo: https://github.com/PyCQA/bandit
-  rev: 1.7.8
-  hooks:
-  - id: bandit
-    exclude: ^tests/
-    args: ["-c", "pyproject.toml"]
-    additional_dependencies:
-    - bandit[toml]
-
-
-- repo: https://github.com/charliermarsh/ruff-pre-commit
-  rev: 'v0.3.7'
-  hooks:
-  - id: ruff
