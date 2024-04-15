@@ -66,7 +66,7 @@ ENV \
   PYTHONUNBUFFERED=1 \
   PYTHONFAULTHANDLER=1
 
-ADD gunicorn.conf.py .
+COPY gunicorn.conf.py .
 
 ENTRYPOINT ["venv/bin/python", "-m", "gunicorn"]
 
