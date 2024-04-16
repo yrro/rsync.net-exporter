@@ -10,8 +10,8 @@ RUN \
     python3.11-pip \
   && microdnf -y clean all
 
-# Mouting ~/.cache/pip as a cache volume causes micropipenv to fail to build
-# wheels for gssapi/ldap; so let's just disable caching altogether.
+# Disable ~/.cache/pip until we set up a cache volume during container image
+# building.
 #
 ENV PIP_NO_CACHE_DIR=off PIP_ROOT_USER_ACTION=ignore
 
