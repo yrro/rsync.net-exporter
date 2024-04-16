@@ -4,7 +4,7 @@ import os
 from typing import Final
 
 
-logger: Final = getLogger(__name__)
+LOGGER: Final = getLogger(__name__)
 
 
 class Host(enum.Enum):
@@ -33,4 +33,4 @@ class Host(enum.Enum):
         if level is not None:
             basicConfig(level=level)
 
-        logger.debug("Host environment: %s", self.name)
+        LOGGER.debug("Host environment: %s", self.name)

@@ -8,7 +8,7 @@ import prometheus_client
 from . import collector
 
 
-exporter: Final = Blueprint("exporter", __name__)
+exporter: Final = Blueprint("exporter", __name__)  # pylint: disable=invalid-name
 
 
 @exporter.route("/probe")

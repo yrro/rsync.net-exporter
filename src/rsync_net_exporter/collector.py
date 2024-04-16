@@ -7,7 +7,7 @@ from prometheus_client.core import GaugeMetricFamily
 import requests
 
 
-logger: Final = getLogger(__name__)
+LOGGER: Final = getLogger(__name__)
 
 
 class Collector(
@@ -63,7 +63,7 @@ class Collector(
         nitems = 0
         for item in root.iterfind("channel/item"):
             if not item.findtext("uid"):
-                logger.debug("Skipping item %r", item.findtext("title"))
+                LOGGER.debug("Skipping item %r", item.findtext("title"))
                 continue
 
             nitems += 1
