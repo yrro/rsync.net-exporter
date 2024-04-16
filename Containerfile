@@ -13,10 +13,7 @@ RUN \
 # Mouting ~/.cache/pip as a cache volume causes micropipenv to fail to build
 # wheels for gssapi/ldap; so let's just disable caching altogether.
 #
-# PIP_ROOT_USER_ACTION is implemented in Pip 22.1; that's not in RHEL 9 at this
-# time, but I'll leave it set in anticipation.
-#
-ENV PIP_NO_CACHE_DIR=off PIP_ROOT_USER_ACTION=warn
+ENV PIP_NO_CACHE_DIR=off PIP_ROOT_USER_ACTION=ignore
 
 RUN python3.11 -m pip install build micropipenv[toml]
 
