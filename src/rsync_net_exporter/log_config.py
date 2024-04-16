@@ -1,17 +1,18 @@
 import enum
 from logging import INFO, DEBUG, basicConfig, getLogger
 import os
+from typing import Final
 
 
-logger = getLogger(__name__)
+logger: Final = getLogger(__name__)
 
 
 class Host(enum.Enum):
 
-    UNKNOWN = enum.auto()
-    FLASK = enum.auto()
-    GUNICORN = enum.auto()
-    PYTEST = enum.auto()
+    UNKNOWN: Final = enum.auto()
+    FLASK: Final = enum.auto()
+    GUNICORN: Final = enum.auto()
+    PYTEST: Final = enum.auto()
 
     @classmethod
     def detect(cls) -> "Host":

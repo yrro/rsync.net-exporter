@@ -1,1 +1,3 @@
-RSYNC_NET_HOST = "www.rsync.net"
+from typing import Final
+
+RSYNC_NET_HOST: Final = "www.rsync.net"
