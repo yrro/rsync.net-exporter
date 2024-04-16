@@ -8,7 +8,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.11"
 Flask = "^3.0.3"
 prometheus-client = "^0.20.0"
 setproctitle = {version = "^1.2.3", optional = true}
@@ -47,7 +47,7 @@ packages = "rsync_net_exporter"
 jobs = 0
 reports = false
 score = false
-py-version = 3.9
+py-version = 3.11
 disable= "line-too-long, missing-function-docstring, missing-class-docstring, missing-module-docstring"
 
 
@@ -66,7 +66,7 @@ testpaths = ["tests"]
 targets = ["src"]
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py311"
 
 [tool.pytest.run]
 source_pkgs = ["rsync_net_exporter"]

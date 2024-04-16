@@ -6,8 +6,8 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal as builder
 
 RUN \
   microdnf -y --nodocs --setopt=install_weak_deps=0 install \
-    python3 \
-    python3-pip \
+    python3.11 \
+    python3.11-pip \
   && microdnf -y clean all
 
 # Mouting ~/.cache/pip as a cache volume causes micropipenv to fail to build
@@ -16,9 +16,9 @@ RUN \
 # PIP_ROOT_USER_ACTION is implemented in Pip 22.1; that's not in RHEL 9 at this
 # time, but I'll leave it set in anticipation.
 #
-ENV PIP_NO_CACHE_DIR=off PIP_ROOT_USER_ACTION=off
+ENV PIP_NO_CACHE_DIR=off PIP_ROOT_USER_ACTION=warn
 
-RUN python3 -m pip install build micropipenv[toml]
+RUN python3.11 -m pip install build micropipenv[toml]
 
 WORKDIR /opt/app-build
 
@@ -30,21 +30,21 @@ COPY pyproject.toml poetry.lock .
 # micropipenv installs all extra packages by default, so we don't need to
 # specify -E production as we would with poetry.
 #
-RUN python3 -m venv /opt/app-root/venv \
+RUN python3.11 -m venv /opt/app-root/venv \
   && source /opt/app-root/venv/bin/activate \
-  && /usr/bin/python3 -m micropipenv install --deploy
+  && /usr/bin/python3.11 -m micropipenv install --deploy
 
 # Now we build the app's wheel...
 
 COPY src src
 
-RUN python3 -m build -w
+RUN python3.11 -m build -w
 
 # ... and install it.
 
-RUN /opt/app-root/venv/bin/python3 -m pip install --no-deps dist/*.whl
+RUN /opt/app-root/venv/bin/python -m pip install --no-deps dist/*.whl
 
-RUN /opt/app-root/venv/bin/python3 -m pip uninstall -y pip setuptools
+RUN /opt/app-root/venv/bin/python -m pip uninstall -y pip setuptools
 
 # In the second stage, a minimal set of OS packages required to run the
 # application is installed, and then the venv is copied from the 'builder'
@@ -54,8 +54,8 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal
 
 RUN \
   microdnf -y --nodocs --setopt=install_weak_deps=0 install \
-    python3 \
-    python3-pip \
+    python3.11 \
+    python3.11-pip \
   && microdnf -y clean all
 
 WORKDIR /opt/app-root
