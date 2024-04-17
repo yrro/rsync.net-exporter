@@ -27,9 +27,17 @@ COPY pyproject.toml poetry.lock .
 # micropipenv installs all extra packages by default, so we don't need to
 # specify -E production as we would with poetry.
 #
-RUN python3.11 -m venv /opt/app-root/venv \
-  && source /opt/app-root/venv/bin/activate \
-  && /usr/bin/python3.11 -m micropipenv install --deploy
+RUN python3.11 -m venv /opt/app-root/venv
+
+# pip installs into to whichever Python environment pip is itself installed
+# into; micropipenv runs pip from the PATH; therefore we must put the virtual
+# environment's pip command into PATH before the system-installed pip command,
+# so that the virtual environment's pip command is invoked and packages are
+# installed into the virtual environment.
+RUN \
+  PATH=/opt/app-root/venv/bin \
+    /usr/bin/python3.11 -m micropipenv \
+        install --deploy
 
 # Now we build the app's wheel...
 
