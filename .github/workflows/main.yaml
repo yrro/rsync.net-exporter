@@ -110,6 +110,15 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' # NOT a security check!
 
+  test-build-push:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+
+    steps:
+
     - name: Delete old images
       uses: snok/container-retention-policy@v2
       with:
