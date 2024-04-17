@@ -1,13 +1,17 @@
+ARG PYTHON_SUFFIX=3.11
+
 # This is a two-stage build process. The first 'builder' container creates a
 # venv into which the application's dependencies are installed. Then a wheel of
 # the application is built and it too is installed into the venv.
 #
 FROM registry.access.redhat.com/ubi9/ubi-minimal as builder
 
+ARG PYTHON_SUFFIX
+
 RUN \
   microdnf -y --nodocs --setopt=install_weak_deps=0 install \
-    python3.11 \
-    python3.11-pip \
+    python${PYTHON_SUFFIX} \
+    python${PYTHON_SUFFIX}-pip \
   && microdnf -y clean all
 
 # Disable ~/.cache/pip until we set up a cache volume during container image
@@ -15,41 +19,43 @@ RUN \
 #
 ENV PIP_NO_CACHE_DIR=off PIP_ROOT_USER_ACTION=ignore
 
-RUN python3.11 -m pip install build micropipenv[toml]
+RUN python${PYTHON_SUFFIX} -m pip install build micropipenv[toml]
 
 WORKDIR /opt/app-build
 
 COPY pyproject.toml poetry.lock .
 
-# We activate the app's venv so that micropipenv will install into it instead
-# of the system Python environment.
-#
-# micropipenv installs all extra packages by default, so we don't need to
-# specify -E production as we would with poetry.
-#
-RUN python3.11 -m venv /opt/app-root/venv
-
-# pip installs into to whichever Python environment pip is itself installed
-# into; micropipenv runs pip from the PATH; therefore we must put the virtual
-# environment's pip command into PATH before the system-installed pip command,
-# so that the virtual environment's pip command is invoked and packages are
-# installed into the virtual environment.
-RUN \
-  PATH=/opt/app-root/venv/bin \
-    /usr/bin/python3.11 -m micropipenv \
-        install --deploy
-
-# Now we build the app's wheel...
+# Build the app's wheel.
 
 COPY src src
 
-RUN python3.11 -m build -w
+RUN python${PYTHON_SUFFIX} -m build -w -v
 
-# ... and install it.
+# Create the runtime virtual environment for the app.
+#
+RUN \
+  python${PYTHON_SUFFIX} -m venv \
+    --without-pip \
+    /opt/app-root/venv
 
-RUN /opt/app-root/venv/bin/python -m pip install --no-deps dist/*.whl
+# micropipenv always runs 'pip', but if we're not using the default Python
+# packages then only pip${PYTHON_SUFFIX} is provided; so create a symlink
+# pointing to the right pip command.
+RUN \
+  ln -sr -T /usr/bin/pip${PYTHON_SUFFIX} /usr/local/bin/pip
 
-RUN /opt/app-root/venv/bin/python -m pip uninstall -y pip setuptools
+# Cause subsequent pip invocations to install into the runtime virtual
+# environment.
+#
+ENV PIP_PYTHON=/opt/app-root/venv/bin/python
+
+# Install dependencies and the app's built wheel.
+
+RUN \
+  python${PYTHON_SUFFIX} -m micropipenv \
+    install --deploy
+
+RUN python${PYTHON_SUFFIX} -m pip install --no-deps dist/*.whl
 
 # In the second stage, a minimal set of OS packages required to run the
 # application is installed, and then the venv is copied from the 'builder'
@@ -57,10 +63,11 @@ RUN /opt/app-root/venv/bin/python -m pip uninstall -y pip setuptools
 #
 FROM registry.access.redhat.com/ubi9/ubi-minimal
 
+ARG PYTHON_SUFFIX
+
 RUN \
   microdnf -y --nodocs --setopt=install_weak_deps=0 install \
-    python3.11 \
-    python3.11-pip \
+    python${PYTHON_SUFFIX} \
   && microdnf -y clean all
 
 WORKDIR /opt/app-root
