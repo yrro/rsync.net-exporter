@@ -12,17 +12,14 @@ defaults:
 
 jobs:
 
-  test-build:
+  test-build-push:
 
     runs-on: ubuntu-latest
 
-    steps:
+    permissions:
+      packages: write
 
-    - name: Create cache for workspace
-      uses: actions/cache@v4
-      with:
-        path: .
-        key: workspace-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}
+    steps:
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -57,23 +54,6 @@ jobs:
 
     - name: Run unit tests
       run: poetry run pytest --junit-xml=junit-default.xml
-
-  push-prune:
-
-    needs: test-build
-
-    runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
-
-    steps:
-
-    - name: Restore cached workspace
-      uses: actions/cache/restore@v4
-      with:
-        path: .
-        key: workspace-${{ github.run_id }}-${{ github.run_number }}-${{ github.run_attempt }}
 
     - name: Record build timestamp
       id: rfc_3339
