@@ -46,7 +46,7 @@ ENV PIP_PYTHON=/opt/app-root/venv/bin/python
 # Install dependencies and the app's built wheel.
 
 RUN \
-  MICROPIPENV_PIP_BIN=/usr/bin/pip${PYTHON_SUFFIX} \
+  MICROPIPENV_PIP_BIN=pip${PYTHON_SUFFIX} \
   python${PYTHON_SUFFIX} -m micropipenv \
     install --deploy
 
