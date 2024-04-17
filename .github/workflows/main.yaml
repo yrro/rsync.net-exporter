@@ -68,6 +68,13 @@ jobs:
       packages: write
 
     steps:
+
+    - name: Restore cached workspace
+      uses: actions/cache/restore@v4
+      with:
+        path: .
+        key: workspace
+
     - name: Record build timestamp
       id: rfc_3339
       run: echo date=$(date --rfc-3339=seconds) >> $GITHUB_OUTPUT
