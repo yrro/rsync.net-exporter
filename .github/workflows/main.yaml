@@ -109,3 +109,13 @@ jobs:
         username: _ignored_
         password: ${{ secrets.GITHUB_TOKEN }}
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' # NOT a security check!
+
+    - name: Delete old images
+      uses: snok/container-retention-policy@v2
+      with:
+        image-names: rsync.net-exporter
+        cut-off: 1 minute ago UTC
+        keep-at-least: 5
+        account-type: personal
+        token: ${{ secrets.GITHUB_TOKEN }}
+        token-type: github-token
