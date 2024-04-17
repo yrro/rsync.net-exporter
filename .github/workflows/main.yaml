@@ -12,14 +12,17 @@ defaults:
 
 jobs:
 
-  test-build-push:
+  test-build:
 
     runs-on: ubuntu-latest
 
-    permissions:
-      packages: write
-
     steps:
+
+    - name: Create cache for workspace
+      uses: actions/cache@v4
+      with:
+        path: .
+        key: workspace
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -55,6 +58,16 @@ jobs:
     - name: Run unit tests
       run: poetry run pytest --junit-xml=junit-default.xml
 
+  push-prune:
+
+    needs: test-build
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+
+    steps:
     - name: Record build timestamp
       id: rfc_3339
       run: echo date=$(date --rfc-3339=seconds) >> $GITHUB_OUTPUT
