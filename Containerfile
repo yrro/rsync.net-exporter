@@ -38,12 +38,6 @@ RUN \
     --without-pip \
     /opt/app-root/venv
 
-# micropipenv always runs 'pip', but if we're not using the default Python
-# packages then only pip${PYTHON_SUFFIX} is provided; so create a symlink
-# pointing to the right pip command.
-RUN \
-  ln -sr -T /usr/bin/pip${PYTHON_SUFFIX} /usr/local/bin/pip
-
 # Cause subsequent pip invocations to install into the runtime virtual
 # environment.
 #
@@ -52,6 +46,7 @@ ENV PIP_PYTHON=/opt/app-root/venv/bin/python
 # Install dependencies and the app's built wheel.
 
 RUN \
+  MICROPIPENV_PIP_BIN=/usr/bin/pip${PYTHON_SUFFIX} \
   python${PYTHON_SUFFIX} -m micropipenv \
     install --deploy
 
