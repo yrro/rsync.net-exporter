@@ -75,7 +75,7 @@ repos:
 
   - id: pip-audit
     name: pip-audit
-    entry: poetry run pip-audit --skip-editable --ignore-vuln={PYSEC-2023-242,GHSA-w3h3-4rj7-4ph4} --desc
+    entry: poetry run pip-audit --skip-editable --ignore-vuln=PYSEC-2023-242 --desc
     language: system
     files: ^poetry\.lock$
     pass_filenames: false
