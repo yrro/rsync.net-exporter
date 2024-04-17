@@ -102,6 +102,7 @@ jobs:
       run: buildah commit w ghcr.io/yrro/rsync.net-exporter
 
     - name: Push image
+      id: push
       uses: redhat-actions/push-to-registry@v2
       with:
         tags: ghcr.io/yrro/rsync.net-exporter:latest
@@ -109,16 +110,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' # NOT a security check!
 
-  prune:
-
-    runs-on: ubuntu-latest
-
-    permissions:
-      packages: write
-
-    steps:
-
-    - name: Delete old images
+    - name: Prune old images
       uses: snok/container-retention-policy@v2
       with:
         image-names: rsync.net-exporter
@@ -127,3 +119,4 @@ jobs:
         account-type: personal
         token: ${{ secrets.GITHUB_TOKEN }}
         token-type: github-token
+      if: steps.push.outcome == 'success'
