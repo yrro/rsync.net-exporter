@@ -70,6 +70,7 @@ jobs:
           org.opencontainers.image.source=${{ github.repositoryUrl }}
           org.opencontainers.image.url=https://github.com/${{ github.repository }}
           org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
+        layers: true
 
     - name: Run container tests
       run: poetry run pytest -m container --junit-xml=junit-container.xml
