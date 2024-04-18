@@ -1,0 +1,32 @@
+name: Build & publish micro container image
+
+on:
+
+  pull_request:
+
+  push:
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  test-build-push:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Build container image
+      run: buildah unshare python build.py
