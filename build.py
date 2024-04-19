@@ -57,7 +57,7 @@ def main(argv):  # pylint: disable=unused-argument
                 [
                     "rpm",
                     f"--root={production_mnt}",
-                    #f"--dbpath={production_mnt}/var/lib/rpm",
+                    # f"--dbpath={production_mnt}/var/lib/rpm",
                     "-vv",
                     "--import",
                     production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
