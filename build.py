@@ -57,6 +57,7 @@ def main(argv):
                 [
                     "rpm",
                     f"--root={production_mnt}",
+                    f"--dbpath={production_mnt}/var/lib/rpm",
                     "--import",
                     production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
                 ],
@@ -98,7 +99,7 @@ def main(argv):
             # ~runner/.rpmdb created by the rpm --import command; let's not
             # remove it because we should probably figure out _why_
             # /var/lib/rpmdb was not used...
-            #shutil.rmtree(production_mnt / "home/runner")
+            # shutil.rmtree(production_mnt / "home/runner")
 
         run(
             [
