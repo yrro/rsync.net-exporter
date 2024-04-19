@@ -60,17 +60,13 @@ jobs:
       run: echo date=$(date --rfc-3339=seconds) >> $GITHUB_OUTPUT
 
     - name: Build container image
-      uses: redhat-actions/buildah-build@v2
-      with:
-        image: localhost/rsync.net-exporter
-        containerfiles: Containerfile
-        labels: |
-          org.opencontainers.image.created=${{ steps.rfc_3339.outputs.date }}
-          org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.source=${{ github.repositoryUrl }}
-          org.opencontainers.image.url=https://github.com/${{ github.repository }}
-          org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
-        layers: true
+      run: buildah unshare python build.py
+      #labels: |
+      #   org.opencontainers.image.created=${{ steps.rfc_3339.outputs.date }}
+      #   org.opencontainers.image.revision=${{ github.sha }}
+      #   org.opencontainers.image.source=${{ github.repositoryUrl }}
+      #   org.opencontainers.image.url=https://github.com/${{ github.repository }}
+      #   org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
 
     - name: Run container tests
       run: poetry run pytest -m container --junit-xml=junit-container.xml

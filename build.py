@@ -20,7 +20,7 @@ def main(argv):
             "build",
             f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
             "-t",
-            "rsync.net-exporter-builder",
+            "localhost/rsync.net-exporter-builder",
             "Containerfile.builder",
         ],
         check=True,
@@ -34,7 +34,7 @@ def main(argv):
 
             (production_mnt / "opt/app-root").mkdir(parents=True)
 
-            with buildah_from(["rsync.net-exporter-builder"]) as builder_ctr:
+            with buildah_from(["localhost/rsync.net-exporter-builder"]) as builder_ctr:
                 with buildah_mount(builder_ctr) as builder_mnt:
                     shutil.copytree(
                         builder_mnt / "opt/app-root/venv",
@@ -53,7 +53,15 @@ def main(argv):
             # time we can import the keys into the production container's RPM
             # database before running DNF.
             #
-            run(["rpm", f"--root={production_mnt}", "--import", production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"], check=True)
+            run(
+                [
+                    "rpm",
+                    f"--root={production_mnt}",
+                    "--import",
+                    production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
+                ],
+                check=True,
+            )
 
             run(
                 [
@@ -102,7 +110,7 @@ def main(argv):
             check=True,
         )
 
-        run(["buildah", "commit", production_ctr, "rsync.net-exporter"], check=True)
+        run(["buildah", "commit", production_ctr, "localhost/rsync.net-exporter"], check=True)
 
     return 0
 
