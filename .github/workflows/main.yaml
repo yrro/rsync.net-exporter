@@ -86,7 +86,7 @@ jobs:
       run: buildah from --pull=false --name=w localhost/rsync.net-exporter # github's image's buildah is too old to support --pull=never; regardless the use of localhost will also prevent pulling
 
     - name: Apply additional image labels
-      run: >
+      run: >-
         buildah config
           --label org.opencontainers.image.base.name='${{ steps.image_base_ref.outputs.ref }}'
           --label org.opencontainers.image.base.digest='${{ steps.image_base_digest.outputs.digest }}'
