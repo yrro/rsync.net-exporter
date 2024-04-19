@@ -53,16 +53,20 @@ def main(argv):
             # time we can import the keys into the production container's RPM
             # database before running DNF.
             #
-            run(
-                [
-                    "rpm",
-                    f"--root={production_mnt}",
-                    f"--dbpath={production_mnt}/var/lib/rpm",
-                    "--import",
-                    production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                ],
-                check=True,
-            )
+            #run(
+            #    [
+            #        "rpm",
+            #        f"--root={production_mnt}",
+            #        f"--dbpath={production_mnt}/var/lib/rpm",
+            #        "--import",
+            #        production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
+            #    ],
+            #    check=True,
+            #)
+
+            # Prevent runner environment from affecting how DNF works (e.g.,
+            # updating ~runner/.rpmdb instead of /var/lib/rpmdb)
+            environ = {}
 
             run(
                 [
@@ -78,6 +82,7 @@ def main(argv):
                     "install",
                     "python3.11",
                 ],
+                env=environ,
                 check=True,
             )
 
@@ -91,6 +96,7 @@ def main(argv):
                     "clean",
                     "all",
                 ],
+                env=environ,
                 check=True,
             )
 
