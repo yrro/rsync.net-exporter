@@ -63,6 +63,9 @@ def main(argv):
                 check=True,
             )
 
+            # ~runner/.rpmdb probably created by the rpm --import command
+            shutil.rmtree(production_mnt / f"home/runner")
+
             run(
                 [
                     "dnf",
