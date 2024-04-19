@@ -1,6 +1,7 @@
 import contextlib
 import json
 from logging import basicConfig, getLogger
+import os
 from pathlib import Path
 import shutil
 import subprocess  # nosec
@@ -67,7 +68,7 @@ def main(argv):  # pylint: disable=unused-argument
 
             # Prevent runner environment from affecting how DNF works (e.g.,
             # updating ~runner/.rpmdb instead of /var/lib/rpmdb)
-            environ = {}
+            environ = os.environ()
 
             run(
                 [
