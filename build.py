@@ -95,8 +95,10 @@ def main(argv):
 
             shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
 
-            # ~runner/.rpmdb created by the rpm --import command
-            shutil.rmtree(production_mnt / "home/runner")
+            # ~runner/.rpmdb created by the rpm --import command; let's not
+            # remove it because we should probably figure out _why_
+            # /var/lib/rpmdb was not used...
+            #shutil.rmtree(production_mnt / "home/runner")
 
         run(
             [
