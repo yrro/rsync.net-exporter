@@ -61,12 +61,6 @@ jobs:
 
     - name: Build container image
       run: buildah unshare python build.py
-      #labels: |
-      #   org.opencontainers.image.created=${{ steps.rfc_3339.outputs.date }}
-      #   org.opencontainers.image.revision=${{ github.sha }}
-      #   org.opencontainers.image.source=${{ github.repositoryUrl }}
-      #   org.opencontainers.image.url=https://github.com/${{ github.repository }}
-      #   org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
 
     - name: Run container tests
       run: poetry run pytest -m container --junit-xml=junit-container.xml
@@ -89,10 +83,15 @@ jobs:
       run: buildah from --pull=false --name=w localhost/rsync.net-exporter # github's image's buildah is too old to support --pull=never; regardless the use of localhost will also prevent pulling
 
     - name: Apply additional image labels
-      run: |
-        buildah config \
-          --label org.opencontainers.image.base.name=${{ steps.image_base_ref.outputs.ref }} \
-          --label org.opencontainers.image.base.digest=${{ steps.image_base_digest.outputs.digest }} \
+      run: >
+        buildah config
+          --label org.opencontainers.image.base.name=${{ steps.image_base_ref.outputs.ref }}
+          --label org.opencontainers.image.base.digest=${{ steps.image_base_digest.outputs.digest }}
+          --label org.opencontainers.image.created=${{ steps.rfc_3339.outputs.date }}
+          --label org.opencontainers.image.revision=${{ github.sha }}
+          --label org.opencontainers.image.source=${{ github.repositoryUrl }}
+          --label org.opencontainers.image.url=https://github.com/${{ github.repository }}
+          --label org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
           w
 
     - name: Commit working container
