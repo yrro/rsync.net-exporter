@@ -118,6 +118,7 @@ def main(argv):
                 "--workingdir=/opt/app-root",
                 "--entrypoint=" + json.dumps(["venv/bin/python", "-m", "gunicorn"]),
                 "--cmd=",
+                "--stop-signal=SIGTERM",
                 production_ctr,
             ],
             check=True,
