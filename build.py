@@ -170,7 +170,9 @@ def buildah_mount(ctr):
 
 def run(*args, **kwargs):
     LOGGER.debug("%r", args)
-    return subprocess.run(*args, **kwargs)  # nosec pylint: disable=subprocess-run-check
+    p = subprocess.run(*args, **kwargs)  # nosec pylint: disable=subprocess-run-check
+    LOGGER.debug("%r", p)
+    return p
 
 
 if __name__ == "__main__":
