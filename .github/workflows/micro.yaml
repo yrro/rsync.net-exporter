@@ -1,4 +1,4 @@
-name: Build & publish micro container image
+name: Build micro container image
 
 on:
 
