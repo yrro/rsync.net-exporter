@@ -34,17 +34,5 @@ jobs:
     - name: Build container image
       run: buildah unshare python build.py
 
-  micro-2:
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
-    - name: Build container image
-      run: mkdir /tmp/containers && buildah build -v /tmp/containers:/var/lib/containers Containerfile.builder2
+    - run: buildah inspect localhost/rsync.net-exporter
 ...

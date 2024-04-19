@@ -46,6 +46,13 @@ def main(argv):
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
+            # According to
+            # <https://bugzilla.redhat.com/show_bug.cgi?id=2039261#c1> the
+            # --setopt= options to dnf should take care of this, but I can't
+            # figure out the right option names for the UBI repos. In the mean
+            # time we can import the keys into the production container's RPM
+            # database before running DNF.
+            #
             run(["rpm", f"--root={production_mnt}", "--import", production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"], check=True)
 
             run(
