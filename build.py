@@ -105,6 +105,7 @@ def main(argv):
                 "--user=1001:0",
                 "--workingdir=/opt/app-root",
                 "--entrypoint=" + json.dumps(["venv/bin/python", "-m", "gunicorn"]),
+                "--cmd=",
                 production_ctr,
             ],
             check=True,
