@@ -88,13 +88,13 @@ jobs:
     - name: Apply additional image labels
       run: >
         buildah config
-          --label org.opencontainers.image.base.name=${{ steps.image_base_ref.outputs.ref }}
-          --label org.opencontainers.image.base.digest=${{ steps.image_base_digest.outputs.digest }}
-          --label org.opencontainers.image.created=${{ steps.rfc_3339.outputs.date }}
-          --label org.opencontainers.image.revision=${{ github.sha }}
-          --label org.opencontainers.image.source=${{ github.repositoryUrl }}
-          --label org.opencontainers.image.url=https://github.com/${{ github.repository }}
-          --label org.opencontainers.image.version=${{ steps.pep_440.outputs.version }}
+          --label org.opencontainers.image.base.name='${{ steps.image_base_ref.outputs.ref }}'
+          --label org.opencontainers.image.base.digest='${{ steps.image_base_digest.outputs.digest }}'
+          --label org.opencontainers.image.created='${{ steps.rfc_3339.outputs.date }}'
+          --label org.opencontainers.image.revision='${{ github.sha }}'
+          --label org.opencontainers.image.source='${{ github.repositoryUrl }}'
+          --label org.opencontainers.image.url='https://github.com/${{ github.repository }}'
+          --label org.opencontainers.image.version='${{ steps.pep_440.outputs.version }}'
           w
 
     - name: Commit working container
