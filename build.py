@@ -13,7 +13,7 @@ RELEASEVER = "9"
 PYTHON_SUFFIX = "3.11"
 
 
-def main(argv):
+def main(argv):  # pylint: disable=unused-argument
     run(
         [
             "buildah",
@@ -157,7 +157,7 @@ def buildah_mount(ctr):
 
 def run(*args, **kwargs):
     LOGGER.debug("%r", args)
-    return subprocess.run(*args, **kwargs)  # nosec
+    return subprocess.run(*args, **kwargs)  # nosec pylint: disable=subprocess-run-check
 
 
 if __name__ == "__main__":
