@@ -57,8 +57,8 @@ def container(ca):
                 "--add-host=www.rsync.net:10.0.2.2",
                 f"--volume={ca_temp_path}:/tmp/ca-bundle.crt:ro,Z",
                 "--env=REQUESTS_CA_BUNDLE=/tmp/ca-bundle.crt",
+                "--env=GUNICORN_CMD_ARGS=--log-level=debug",  # Avoid overwriting default command line
                 "localhost/rsync.net-exporter",
-                "--log-level=debug",
             ],
             stdout=subprocess.PIPE,
             text=True,
