@@ -3,7 +3,7 @@ import json
 from logging import basicConfig, getLogger
 from pathlib import Path
 import shutil
-import subprocess
+import subprocess  # nosec
 import sys
 
 
@@ -137,7 +137,7 @@ def main(argv):
 def buildah_from(args):
     p1 = run(["buildah", "from", *args], text=True, stdout=subprocess.PIPE, check=True)
     ctr = p1.stdout.strip()
-    assert ctr
+    assert ctr  # nosec
     try:
         yield ctr
     finally:
@@ -148,7 +148,7 @@ def buildah_from(args):
 def buildah_mount(ctr):
     p2 = run(["buildah", "mount", ctr], text=True, stdout=subprocess.PIPE, check=True)
     mnt = p2.stdout.strip()
-    assert mnt
+    assert mnt  # nosec
     try:
         yield Path(mnt)
     finally:
@@ -157,7 +157,7 @@ def buildah_mount(ctr):
 
 def run(*args, **kwargs):
     LOGGER.debug("%r", args)
-    return subprocess.run(*args, **kwargs)
+    return subprocess.run(*args, **kwargs)  # nosec
 
 
 if __name__ == "__main__":
