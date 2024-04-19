@@ -110,7 +110,10 @@ def main(argv):
             check=True,
         )
 
-        run(["buildah", "commit", production_ctr, "localhost/rsync.net-exporter"], check=True)
+        run(
+            ["buildah", "commit", production_ctr, "localhost/rsync.net-exporter"],
+            check=True,
+        )
 
     return 0
 
