@@ -18,6 +18,9 @@ jobs:
 
     steps:
 
+    - name: Install DNF
+      run: sudo apt install dnf
+
     - name: Checkout
       uses: actions/checkout@v4
       with:
