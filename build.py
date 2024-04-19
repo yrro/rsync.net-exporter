@@ -45,6 +45,9 @@ def main(argv):
             shutil.copy(
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
+
+            run(["rpm", f"--root={production_mnt}", "--import", production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"], check=True)
+
             run(
                 [
                     "dnf",
