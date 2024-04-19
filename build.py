@@ -48,6 +48,8 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
+            run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
+
             with group("Import RPM PGP keys"):
                 # According to
                 # <https://bugzilla.redhat.com/show_bug.cgi?id=2039261#c1> the
@@ -67,6 +69,8 @@ def main(argv):  # pylint: disable=unused-argument
                     ],
                     check=True,
                 )
+
+            run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
 
             # Prevent runner environment from affecting how DNF works (e.g.,
             # updating ~runner/.rpmdb instead of /var/lib/rpmdb)
@@ -104,6 +108,8 @@ def main(argv):  # pylint: disable=unused-argument
                     env=environ,
                     check=True,
                 )
+
+            run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
 
             shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
 
