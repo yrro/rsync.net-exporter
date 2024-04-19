@@ -15,17 +15,18 @@ PYTHON_SUFFIX = "3.11"
 
 
 def main(argv):  # pylint: disable=unused-argument
-    run(
-        [
-            "buildah",
-            "build",
-            f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
-            "-t",
-            "localhost/rsync.net-exporter-builder",
-            "Containerfile.builder",
-        ],
-        check=True,
-    )
+    with group("Create builder container"):
+        run(
+            [
+                "buildah",
+                "build",
+                f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
+                "-t",
+                "localhost/rsync.net-exporter-builder",
+                "Containerfile.builder",
+            ],
+            check=True,
+        )
 
     with buildah_from(
         ["--pull", f"registry.access.redhat.com/ubi{RELEASEVER}/ubi-micro"]
@@ -47,60 +48,62 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
-            # According to
-            # <https://bugzilla.redhat.com/show_bug.cgi?id=2039261#c1> the
-            # --setopt= options to dnf should take care of this, but I can't
-            # figure out the right option names for the UBI repos. In the mean
-            # time we can import the keys into the production container's RPM
-            # database before running DNF.
-            #
-            run(
-                [
-                    "rpm",
-                    f"--root={production_mnt}",
-                    # f"--dbpath={production_mnt}/var/lib/rpm",
-                    "-vv",
-                    "--import",
-                    production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                ],
-                check=True,
-            )
+            with group("Import RPM PGP keys"):
+                # According to
+                # <https://bugzilla.redhat.com/show_bug.cgi?id=2039261#c1> the
+                # --setopt= options to dnf should take care of this, but I can't
+                # figure out the right option names for the UBI repos. In the mean
+                # time we can import the keys into the production container's RPM
+                # database before running DNF.
+                #
+                run(
+                    [
+                        "rpm",
+                        f"--root={production_mnt}",
+                        # f"--dbpath={production_mnt}/var/lib/rpm",
+                        "-vv",
+                        "--import",
+                        production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
+                    ],
+                    check=True,
+                )
 
             # Prevent runner environment from affecting how DNF works (e.g.,
             # updating ~runner/.rpmdb instead of /var/lib/rpmdb)
-            environ = os.environ()
+            environ = os.environ.copy()
 
-            run(
-                [
-                    "dnf",
-                    "-y",
-                    "--noplugins",
-                    f"--installroot={production_mnt}",
-                    f"--setopt=ubi-9-appstream-rpms.gpgkey={production_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                    f"--setopt=ubi-9-baseos-rpms.gpgkey={production_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                    f"--releasever={RELEASEVER}",
-                    "--nodocs",
-                    "--setopt=install_weak_deps=0",
-                    "install",
-                    "python3.11",
-                ],
-                env=environ,
-                check=True,
-            )
+            with group("Install packages"):
+                run(
+                    [
+                        "dnf",
+                        "-y",
+                        "--noplugins",
+                        f"--installroot={production_mnt}",
+                        f"--setopt=ubi-9-appstream-rpms.gpgkey={production_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
+                        f"--setopt=ubi-9-baseos-rpms.gpgkey={production_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
+                        f"--releasever={RELEASEVER}",
+                        "--nodocs",
+                        "--setopt=install_weak_deps=0",
+                        "install",
+                        "python3.11",
+                    ],
+                    env=environ,
+                    check=True,
+                )
 
-            run(
-                [
-                    "dnf",
-                    "-y",
-                    "--noplugins",
-                    f"--installroot={production_mnt}",
-                    f"--releasever={RELEASEVER}",
-                    "clean",
-                    "all",
-                ],
-                env=environ,
-                check=True,
-            )
+                run(
+                    [
+                        "dnf",
+                        "-y",
+                        "--noplugins",
+                        f"--installroot={production_mnt}",
+                        f"--releasever={RELEASEVER}",
+                        "clean",
+                        "all",
+                    ],
+                    env=environ,
+                    check=True,
+                )
 
             shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
 
@@ -132,6 +135,15 @@ def main(argv):  # pylint: disable=unused-argument
         )
 
     return 0
+
+
+@contextlib.contextmanager
+def group(title):
+    print(f"::group::{title}")
+    try:
+        yield
+    finally:
+        print("::endgroup")
 
 
 @contextlib.contextmanager
