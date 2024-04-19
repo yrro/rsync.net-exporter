@@ -59,6 +59,9 @@ jobs:
       id: rfc_3339
       run: echo date=$(date --rfc-3339=seconds) >> $GITHUB_OUTPUT
 
+    - name: Install DNF
+      run: sudo apt install dnf
+
     - name: Build container image
       run: buildah unshare python build.py
 
