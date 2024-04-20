@@ -99,7 +99,7 @@ def main(argv):  # pylint: disable=unused-argument
         )
 
         run(
-            ["buildah", "commit", production_ctr, "localhost/rsync.net-exporter"],
+            ["buildah", "commit", "--rm", production_ctr, "localhost/rsync.net-exporter"],
             check=True,
         )
 
