@@ -53,7 +53,7 @@ def main(argv):  # pylint: disable=unused-argument
             environ = {
                 # "HOME": "/root",
                 # "SHELL": "/bin/bash",
-                # "PATH": "/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin",
+                "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin",
             }
 
             run(["rpm", f"--root={production_mnt}", "-qa"], env=environ, check=False)
