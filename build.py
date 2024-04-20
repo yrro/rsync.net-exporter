@@ -49,6 +49,9 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
+            with group("List installed packages"):
+                run(["rpm", f"--root={production_mnt}", "-qa"])
+
             with group("Install packages"):
                 run(
                     [
