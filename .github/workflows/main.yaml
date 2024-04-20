@@ -65,6 +65,9 @@ jobs:
     - name: Fix host RPM configuration to match container
       run: echo '%_dbpath %{_var}/lib/rpm' > ~/.rpmmacros
 
+    - name: Query RPM db path
+      run: rpm -E %_dbpath
+
     - name: Build container image
       run: buildah unshare python build.py
 
