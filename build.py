@@ -50,6 +50,9 @@ def main(argv):  # pylint: disable=unused-argument
 
             run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
 
+            run(["setpriv", "-d"])
+            run(["printenv"])
+
             with group("Import RPM PGP keys"):
                 # According to
                 # <https://bugzilla.redhat.com/show_bug.cgi?id=2039261#c1> the
@@ -60,6 +63,9 @@ def main(argv):  # pylint: disable=unused-argument
                 #
                 run(
                     [
+                        "strace",
+                        "-e",
+                        "%file",
                         "rpm",
                         f"--root={production_mnt}",
                         # f"--dbpath={production_mnt}/var/lib/rpm",
@@ -79,6 +85,9 @@ def main(argv):  # pylint: disable=unused-argument
             with group("Install packages"):
                 run(
                     [
+                        "strace",
+                        "-e",
+                        "%file",
                         "dnf",
                         "-y",
                         "--noplugins",
