@@ -68,6 +68,12 @@ jobs:
     - name: Query RPM db path
       run: rpm -E %_dbpath
 
+    - name: Cache container storage
+      uses: actions/cache@v4
+      with:
+        key: containers-storage
+        path: ~/.local/share/containers/storage
+
     - name: Build container image
       run: buildah unshare python build.py
 

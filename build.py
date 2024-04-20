@@ -20,6 +20,7 @@ def main(argv):  # pylint: disable=unused-argument
             [
                 "buildah",
                 "build",
+                "--pull",
                 f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
                 "-t",
                 "localhost/rsync.net-exporter-builder",
