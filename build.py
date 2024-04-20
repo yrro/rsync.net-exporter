@@ -15,6 +15,9 @@ PYTHON_SUFFIX = "3.11"
 
 
 def main(argv):  # pylint: disable=unused-argument
+    with group("rpm --showrc"):
+        run(["rpm", "--showrc"])
+
     with group("Create builder container"):
         run(
             [
