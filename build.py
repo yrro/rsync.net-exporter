@@ -19,7 +19,7 @@ def main(argv):  # pylint: disable=unused-argument
         run(["cat", ".rpmmacros"])
 
     with group("rpm --showrc"):
-        run(["rpm", "--showrc"])
+        run(["strace", "-e", "%file", "rpm", "--showrc"])
 
     with group("Create builder container"):
         run(
