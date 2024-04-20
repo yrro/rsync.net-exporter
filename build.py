@@ -49,12 +49,19 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
-            with group("List installed packages"):
+            with group("Check List installed packages"):
+
                 run(["rpm", f"--root={production_mnt}", "-qa"])
+
+                run(["dnf", "--noplugins", f"--installroot={production_mnt}",
+                     f"--releasever={RELEASEVER}", "list", "--installed"])
 
             with group("Install packages"):
                 run(
                     [
+                        "strace",
+                        "-f",
+                        "-e", "%file",
                         "dnf",
                         "-y",
                         "--noplugins",
@@ -103,7 +110,13 @@ def main(argv):  # pylint: disable=unused-argument
         )
 
         run(
-            ["buildah", "commit", "--rm", production_ctr, "localhost/rsync.net-exporter"],
+            [
+                "buildah",
+                "commit",
+                "--rm",
+                production_ctr,
+                "localhost/rsync.net-exporter",
+            ],
             check=True,
         )
 
