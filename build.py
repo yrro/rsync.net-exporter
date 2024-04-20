@@ -48,7 +48,15 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
-            run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
+            # Prevent runner environment from affecting how DNF works (e.g.,
+            # updating ~runner/.rpmdb instead of /var/lib/rpmdb)
+            environ = {
+                # "HOME": "/root",
+                # "SHELL": "/bin/bash",
+                # "PATH": "/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin",
+            }
+
+            run(["rpm", f"--root={production_mnt}", "-qa"], env=environ, check=False)
 
             run(["setpriv", "-d"])
             run(["printenv"])
@@ -73,14 +81,11 @@ def main(argv):  # pylint: disable=unused-argument
                         "--import",
                         production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
                     ],
+                    env=environ,
                     check=True,
                 )
 
             run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
-
-            # Prevent runner environment from affecting how DNF works (e.g.,
-            # updating ~runner/.rpmdb instead of /var/lib/rpmdb)
-            environ = os.environ.copy()
 
             with group("Install packages"):
                 run(
