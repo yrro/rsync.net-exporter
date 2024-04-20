@@ -66,8 +66,6 @@ def main(argv):  # pylint: disable=unused-argument
                         "-y",
                         "--noplugins",
                         f"--installroot={production_mnt}",
-                        f"--setopt=ubi-9-appstream-rpms.gpgkey={production_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                        f"--setopt=ubi-9-baseos-rpms.gpgkey={production_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
                         f"--releasever={RELEASEVER}",
                         "--nodocs",
                         "--setopt=install_weak_deps=0",
