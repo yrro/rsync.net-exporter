@@ -159,11 +159,11 @@ def main(argv):  # pylint: disable=unused-argument
 
 @contextlib.contextmanager
 def group(title):
-    print(f"::group::{title}")
+    print(f"::group::{title}", flush=True)
     try:
         yield
     finally:
-        print("::endgroup")
+        print("::endgroup", flush=True)
 
 
 @contextlib.contextmanager
