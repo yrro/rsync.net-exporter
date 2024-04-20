@@ -1,7 +1,6 @@
 import contextlib
 import json
 from logging import basicConfig, getLogger
-import os
 from pathlib import Path
 import shutil
 import subprocess  # nosec
@@ -15,11 +14,6 @@ PYTHON_SUFFIX = "3.11"
 
 
 def main(argv):  # pylint: disable=unused-argument
-    with group("print user macros"):
-        run(["cat", ".rpmmacros"])
-
-    with group("rpm --showrc"):
-        run(["strace", "-e", "%file", "rpm", "--showrc"])
 
     with group("Create builder container"):
         run(
@@ -54,51 +48,9 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
-            # Prevent runner environment from affecting how DNF works (e.g.,
-            # updating ~runner/.rpmdb instead of /var/lib/rpmdb)
-            environ = {
-                # "HOME": "/root",
-                # "SHELL": "/bin/bash",
-                "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin",
-            }
-
-            run(["rpm", f"--root={production_mnt}", "-qa"], env=environ, check=False)
-
-            run(["setpriv", "-d"])
-            run(["printenv"])
-
-            with group("Import RPM PGP keys"):
-                # According to
-                # <https://bugzilla.redhat.com/show_bug.cgi?id=2039261#c1> the
-                # --setopt= options to dnf should take care of this, but I can't
-                # figure out the right option names for the UBI repos. In the mean
-                # time we can import the keys into the production container's RPM
-                # database before running DNF.
-                #
-                run(
-                    [
-                        "strace",
-                        "-e",
-                        "%file",
-                        "rpm",
-                        f"--root={production_mnt}",
-                        # f"--dbpath={production_mnt}/var/lib/rpm",
-                        "-vv",
-                        "--import",
-                        production_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                    ],
-                    env=environ,
-                    check=True,
-                )
-
-            run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
-
             with group("Install packages"):
                 run(
                     [
-                        "strace",
-                        "-e",
-                        "%file",
                         "dnf",
                         "-y",
                         "--noplugins",
@@ -111,7 +63,6 @@ def main(argv):  # pylint: disable=unused-argument
                         "install",
                         "python3.11",
                     ],
-                    env=environ,
                     check=True,
                 )
 
@@ -125,18 +76,10 @@ def main(argv):  # pylint: disable=unused-argument
                         "clean",
                         "all",
                     ],
-                    env=environ,
                     check=True,
                 )
 
-            run(["rpm", f"--root={production_mnt}", "-qa"], check=False)
-
             shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
-
-            # ~runner/.rpmdb created by the rpm --import command; let's not
-            # remove it because we should probably figure out _why_
-            # /var/lib/rpmdb was not used...
-            # shutil.rmtree(production_mnt / "home/runner")
 
         run(
             [

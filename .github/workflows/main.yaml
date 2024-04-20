@@ -62,6 +62,9 @@ jobs:
     - name: Install DNF
       run: sudo apt install dnf
 
+    - name: Fix host RPM configuration to match container
+      run: echo '%_dbpath %{_var}/lib/rpm' > ~/.rpmmacros
+
     - name: Build container image
       run: buildah unshare python build.py
 
