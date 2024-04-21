@@ -55,7 +55,7 @@ def main(argv):  # pylint: disable=unused-argument
                 ["rpm", "-E", "%_dbpath"], text=True, stdout=subprocess.PIPE
             )
             LOGGER.error(
-                f"Runtime container has no RPM packages installed. Possibly the the value of %_dbpath within the container differs from the value defined on the host ({prpmdbpath.stdout.strip()!r})."
+                f"Runtime container has no RPM packages installed. Possibly the the value of %_dbpath within the container differs from the value defined on the host (%r).", prpmdbpath.stdout.strip()
             )
             return 1
 
@@ -165,7 +165,7 @@ def run(args, *args_, **kwargs):
             args, *args_, **kwargs
         )  # nosec pylint: disable=subprocess-run-check
     finally:
-        print(f"::endgroup::", flush=True)
+        print("::endgroup::", flush=True)
 
 
 if __name__ == "__main__":
