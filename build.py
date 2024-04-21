@@ -63,40 +63,42 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
-            with group("Check List installed packages"):
+            # <https://github.com/rpm-software-management/rpm/discussions/2735>
+            prpmqa = run(["rpm", f"--root={production_mnt}", "-qa"], text=True, stdout=subprocess.PIPE, check=True)
+            if len(prpmqa.stdout.split("\n")) == 1:
+                prpmdbpath = run(["rpm", "-E", "%_dbpath"], text=True, stdout=subprocess.PIPE)
+                LOGGER.error(f"Runtime container has no RPM packages installed. Possibly the the value of %_dbpath within the container differs from the value defined on the host ({prpmdbpath.stdout.strip()!r}).")
+                return 1
 
-                run(["rpm", f"--root={production_mnt}", "-qa"])
+            run(
+                [
+                    "dnf",
+                    "-y",
+                    "--noplugins",
+                    f"--installroot={production_mnt}",
+                    f"--releasever={RELEASEVER}",
+                    "--nodocs",
+                    "--setopt=install_weak_deps=0",
+                    f"--setopt=ubi-9-baseos-rpms.gpgkey=file://{keyfile.name}",
+                    f"--setopt=ubi-9-appstream-rpms.gpgkey=file://{keyfile.name}",
+                    "install",
+                    "python3.11",
+                ],
+                check=True,
+            )
 
-            with group("Install packages"):
-                run(
-                    [
-                        "dnf",
-                        "-y",
-                        "--noplugins",
-                        f"--installroot={production_mnt}",
-                        f"--releasever={RELEASEVER}",
-                        "--nodocs",
-                        "--setopt=install_weak_deps=0",
-                        f"--setopt=ubi-9-baseos-rpms.gpgkey=file://{keyfile.name}",
-                        f"--setopt=ubi-9-appstream-rpms.gpgkey=file://{keyfile.name}",
-                        "install",
-                        "python3.11",
-                    ],
-                    check=True,
-                )
-
-                run(
-                    [
-                        "dnf",
-                        "-y",
-                        "--noplugins",
-                        f"--installroot={production_mnt}",
-                        f"--releasever={RELEASEVER}",
-                        "clean",
-                        "all",
-                    ],
-                    check=True,
-                )
+            run(
+                [
+                    "dnf",
+                    "-y",
+                    "--noplugins",
+                    f"--installroot={production_mnt}",
+                    f"--releasever={RELEASEVER}",
+                    "clean",
+                    "all",
+                ],
+                check=True,
+            )
 
             shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
 
@@ -131,17 +133,9 @@ def main(argv):  # pylint: disable=unused-argument
 
 
 @contextlib.contextmanager
-def group(title):
-    print(f"::group::{title}", flush=True)
-    try:
-        yield
-    finally:
-        print("::endgroup::", flush=True)
-
-
-@contextlib.contextmanager
 def buildah_from(args):
     p1 = run(["buildah", "from", *args], text=True, stdout=subprocess.PIPE, check=True)
+    sys.stdout.write(p1.stdout)
     ctr = p1.stdout.strip()
     assert ctr  # nosec
     try:
@@ -153,6 +147,7 @@ def buildah_from(args):
 @contextlib.contextmanager
 def buildah_mount(ctr):
     p2 = run(["buildah", "mount", ctr], text=True, stdout=subprocess.PIPE, check=True)
+    sys.stdout.write(p2.stdout)
     mnt = p2.stdout.strip()
     assert mnt  # nosec
     try:
@@ -161,11 +156,12 @@ def buildah_mount(ctr):
         run(["buildah", "unmount", ctr], check=True)
 
 
-def run(*args, **kwargs):
-    LOGGER.debug("%r", args)
-    p = subprocess.run(*args, **kwargs)  # nosec pylint: disable=subprocess-run-check
-    LOGGER.debug("%r", p)
-    return p
+def run(args, *args_, **kwargs):
+    print(f"::group::{args!r}", flush=True)
+    try:
+        return subprocess.run(args, *args_, **kwargs)  # nosec pylint: disable=subprocess-run-check
+    finally:
+        print(f"::endgroup::", flush=True)
 
 
 if __name__ == "__main__":
