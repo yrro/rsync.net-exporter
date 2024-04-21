@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import subprocess  # nosec
 import sys
+import tempfile
 
 
 LOGGER = getLogger(__name__)
@@ -33,7 +34,12 @@ def main(argv):  # pylint: disable=unused-argument
         ["--pull", f"registry.access.redhat.com/ubi{RELEASEVER}/ubi-micro"]
     ) as production_ctr:
 
-        with buildah_mount(production_ctr) as production_mnt:
+        with (
+            buildah_mount(production_ctr) as production_mnt,
+            tempfile.NamedTemporaryFile(
+                prefix="RPM-GPG-KEY-redhat-release-"
+            ) as keyfile,
+        ):
 
             (production_mnt / "opt/app-root").mkdir(parents=True)
 
@@ -45,9 +51,15 @@ def main(argv):  # pylint: disable=unused-argument
                         symlinks=True,
                     )
 
+                    keyfile.write(open(builder_mnt/"etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release", "rb").read())
+                    keyfile.flush()
+
             shutil.copy(
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
+
+            with group("Import RPM PGP keys"):
+                run(["rpm", f"--root={production_mnt}", "--import", keyfile.name], check=True)
 
             with group("Check List installed packages"):
 
