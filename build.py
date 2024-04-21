@@ -58,8 +58,8 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
-            with group("Import RPM PGP keys"):
-                run(["rpm", f"--root={production_mnt}", "--import", keyfile.name], check=True)
+            #with group("Import RPM PGP keys"):
+            #    run(["rpm", f"--root={production_mnt}", "--import", keyfile.name], check=True)
 
             with group("Check List installed packages"):
 
@@ -78,6 +78,8 @@ def main(argv):  # pylint: disable=unused-argument
                         f"--releasever={RELEASEVER}",
                         "--nodocs",
                         "--setopt=install_weak_deps=0",
+                        "--setopt=ubi-9-baseos-rpms.gpgkey=file://{keyfile.name}",
+                        "--setopt=ubi-9-appstream-rpms.gpgkey=file://{keyfile.name}",
                         "install",
                         "python3.11",
                     ],
