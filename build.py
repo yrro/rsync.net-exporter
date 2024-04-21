@@ -51,7 +51,11 @@ def main(argv):  # pylint: disable=unused-argument
                         symlinks=True,
                     )
 
-                    keyfile.write(open(builder_mnt/"etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release", "rb").read())
+                    with open(
+                        builder_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
+                        "rb",
+                    ) as builder_keyfile:
+                        keyfile.write(builder_keyfile.read())
                     keyfile.flush()
 
             shutil.copy(
