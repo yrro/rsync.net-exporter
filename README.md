@@ -145,23 +145,27 @@ commit anyway with `git commit -n`.
 
 ## Building the container image
 
-```
-$ podman build -t rsync.net-exporter .
-```
-
-or
-
-```
-$ buildah build -t rsync.net-exporter --layers .
-```
-
-or
+The container image is built from Red Hat's [UBI
+Micro](https://www.redhat.com/en/blog/introduction-ubi-micro) image. On the
+host you will need [buildah](https://buildah.io/) and
+[DNF](https://github.com/rpm-software-management/dnf) (which is perfectly safe
+to install on non-Red Hat distros; once [this
+issue](https://github.com/containers/buildah/issues/5483) is resolved, we will
+be able to run `dnf` within the builder container instead, so we won't need it
+installed on the host any more).
 
 ```
-$ docker build -t rsync.net-exporter -f Containerfile .
+$ buildah unshare python3 build.py
 ```
 
-Test the container image (with `podman`):
+If you don't want to install DNF, there's an unmaintained `Containerfile` that
+builds a larger image:
+
+```
+$ buildah build -t rsync.net-exporter Containerfile
+```
+
+Test the container image with [podman](https://podman.io/):
 
 ```
 $ poetry run pytest -m container
