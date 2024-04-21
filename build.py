@@ -131,14 +131,10 @@ def main(argv):  # pylint: disable=unused-argument
 
 @contextlib.contextmanager
 def group(title):
-    sys.stdout.flush()
-    sys.stderr.flush()
     print(f"::group::{title}", flush=True)
     try:
         yield
     finally:
-        sys.stdout.flush()
-        sys.stderr.flush()
         print("::endgroup::", flush=True)
 
 
