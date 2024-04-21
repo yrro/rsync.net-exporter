@@ -71,9 +71,6 @@ def main(argv):  # pylint: disable=unused-argument
             with group("Install packages"):
                 run(
                     [
-                        "strace",
-                        "-f",
-                        "-e", "%file",
                         "dnf",
                         "-y",
                         "--noplugins",
