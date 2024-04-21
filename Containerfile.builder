@@ -8,10 +8,7 @@ RUN \
     python${PYTHON_SUFFIX}-pip \
   && microdnf -y clean all
 
-# Disable ~/.cache/pip until we set up a cache volume during container image
-# building.
-#
-ENV PIP_NO_CACHE_DIR=off PIP_ROOT_USER_ACTION=ignore
+ENV PIP_ROOT_USER_ACTION=ignore
 
 RUN python${PYTHON_SUFFIX} -m pip install build micropipenv[toml]
 

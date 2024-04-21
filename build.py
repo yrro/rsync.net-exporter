@@ -16,19 +16,20 @@ PYTHON_SUFFIX = "3.11"
 
 def main(argv):  # pylint: disable=unused-argument
 
-    with group("Create builder container"):
-        run(
-            [
-                "buildah",
-                "build",
-                "--pull",
-                f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
-                "-t",
-                "localhost/rsync.net-exporter-builder",
-                "Containerfile.builder",
-            ],
-            check=True,
-        )
+    run(
+        [
+            "buildah",
+            "build",
+            "--pull",
+            "--layers",
+            "-v", f"{Path('~/.cache/pip').expanduser()}:/root/.cache/pip:O",
+            f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
+            "-t",
+            "localhost/rsync.net-exporter-builder",
+            "Containerfile.builder",
+        ],
+        check=True,
+    )
 
     with buildah_from(
         ["--pull", f"registry.access.redhat.com/ubi{RELEASEVER}/ubi-micro"]
