@@ -65,9 +65,6 @@ def main(argv):  # pylint: disable=unused-argument
 
                 run(["rpm", f"--root={production_mnt}", "-qa"])
 
-                run(["dnf", "--noplugins", f"--installroot={production_mnt}",
-                     f"--releasever={RELEASEVER}", "list", "--installed"])
-
             with group("Install packages"):
                 run(
                     [
