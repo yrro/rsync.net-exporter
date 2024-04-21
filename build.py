@@ -139,7 +139,7 @@ def group(title):
     finally:
         sys.stdout.flush()
         sys.stderr.flush()
-        print("::endgroup", flush=True)
+        print("::endgroup::", flush=True)
 
 
 @contextlib.contextmanager
