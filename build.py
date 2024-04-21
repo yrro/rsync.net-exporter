@@ -101,6 +101,11 @@ def main(argv):  # pylint: disable=unused-argument
 
         shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
 
+        # <https://github.com/rpm-software-management/rpm/discussions/2735>
+        for p in Path(production_mnt / "usr/share/locale").iterdir():
+            if p.is_dir():
+                shutil.rmtree(p)
+
         run(
             [
                 "buildah",
