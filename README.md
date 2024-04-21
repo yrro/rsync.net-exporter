@@ -49,6 +49,11 @@ If you're into containers:
 $ podman run --name=rsync.net-exporter --net=host --rm --replace ghcr.io/yrro/rsync.net-exporter
 ```
 
+You can provide any desired [Gunicorn
+settings](https://docs.gunicorn.org/en/latest/settings.html), such as `--bind=`
+to change the port number on which the exporter listens, as additional
+arguments after the image name.
+
 If you're not into containers, you need [Poetry](https://python-poetry.org/)
 which will take care of creating a venv, installing dependencies, etc.
 
@@ -96,17 +101,6 @@ This assumes you're running the exporter on the same machine as Prometheus. If
 not, adjust the replacement string for `__address__` as appropriate.
 
 Note: metrics about the exporter itself are exposed at `/metrics`.
-
-## Using your own Gunicorn settings in a container
-
-[Gunicorn settings](https://docs.gunicorn.org/en/latest/settings.html) can be
-specified as command line arguments. This will override the default settings
-baked in to the container image. For instance, to change the exporter's port
-number:
-
-```
-$ podman run --name=rsync.net-exporter --net=host --rm --replace ghcr.io/yrro/hitron-exporter:latest --bind-address='0.0.0.0:1521'
-```
 
 ## How to develop
 
