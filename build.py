@@ -135,7 +135,6 @@ def main(argv):  # pylint: disable=unused-argument
 @contextlib.contextmanager
 def buildah_from(args):
     p1 = run(["buildah", "from", *args], text=True, stdout=subprocess.PIPE, check=True)
-    sys.stdout.write(p1.stdout)
     ctr = p1.stdout.strip()
     assert ctr  # nosec
     try:
@@ -147,7 +146,6 @@ def buildah_from(args):
 @contextlib.contextmanager
 def buildah_mount(ctr):
     p2 = run(["buildah", "mount", ctr], text=True, stdout=subprocess.PIPE, check=True)
-    sys.stdout.write(p2.stdout)
     mnt = p2.stdout.strip()
     assert mnt  # nosec
     try:
