@@ -5,7 +5,6 @@ from pathlib import Path
 import shutil
 import subprocess  # nosec
 import sys
-import tempfile
 
 
 LOGGER = getLogger(__name__)
@@ -31,44 +30,44 @@ def main(argv):  # pylint: disable=unused-argument
         check=True,
     )
 
-    with buildah_from(
-        ["--pull", f"registry.access.redhat.com/ubi{RELEASEVER}/ubi-micro"]
-    ) as production_ctr:
+    with (
+        buildah_from(
+            ["--pull", f"registry.access.redhat.com/ubi{RELEASEVER}/ubi-micro"]
+        ) as production_ctr,
+        buildah_mount(production_ctr) as production_mnt,
+    ):
+
+        (production_mnt / "opt/app-root").mkdir(parents=True)
+
+        shutil.copy(
+            "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
+        )
+
+        # <https://github.com/rpm-software-management/rpm/discussions/2735>
+        prpmqa = run(
+            ["rpm", f"--root={production_mnt}", "-qa"],
+            text=True,
+            stdout=subprocess.PIPE,
+            check=True,
+        )
+        if len(prpmqa.stdout.split("\n")) == 1:
+            prpmdbpath = run(
+                ["rpm", "-E", "%_dbpath"], text=True, stdout=subprocess.PIPE
+            )
+            LOGGER.error(
+                f"Runtime container has no RPM packages installed. Possibly the the value of %_dbpath within the container differs from the value defined on the host ({prpmdbpath.stdout.strip()!r})."
+            )
+            return 1
 
         with (
-            buildah_mount(production_ctr) as production_mnt,
-            tempfile.NamedTemporaryFile(
-                prefix="RPM-GPG-KEY-redhat-release-"
-            ) as keyfile,
+            buildah_from(["localhost/rsync.net-exporter-builder"]) as builder_ctr,
+            buildah_mount(builder_ctr) as builder_mnt,
         ):
-
-            (production_mnt / "opt/app-root").mkdir(parents=True)
-
-            with buildah_from(["localhost/rsync.net-exporter-builder"]) as builder_ctr:
-                with buildah_mount(builder_ctr) as builder_mnt:
-                    shutil.copytree(
-                        builder_mnt / "opt/app-root/venv",
-                        production_mnt / "opt/app-root/venv",
-                        symlinks=True,
-                    )
-
-                    with open(
-                        builder_mnt / "etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                        "rb",
-                    ) as builder_keyfile:
-                        keyfile.write(builder_keyfile.read())
-                    keyfile.flush()
-
-            shutil.copy(
-                "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
+            shutil.copytree(
+                builder_mnt / "opt/app-root/venv",
+                production_mnt / "opt/app-root/venv",
+                symlinks=True,
             )
-
-            # <https://github.com/rpm-software-management/rpm/discussions/2735>
-            prpmqa = run(["rpm", f"--root={production_mnt}", "-qa"], text=True, stdout=subprocess.PIPE, check=True)
-            if len(prpmqa.stdout.split("\n")) == 1:
-                prpmdbpath = run(["rpm", "-E", "%_dbpath"], text=True, stdout=subprocess.PIPE)
-                LOGGER.error(f"Runtime container has no RPM packages installed. Possibly the the value of %_dbpath within the container differs from the value defined on the host ({prpmdbpath.stdout.strip()!r}).")
-                return 1
 
             run(
                 [
@@ -79,28 +78,28 @@ def main(argv):  # pylint: disable=unused-argument
                     f"--releasever={RELEASEVER}",
                     "--nodocs",
                     "--setopt=install_weak_deps=0",
-                    f"--setopt=ubi-9-baseos-rpms.gpgkey=file://{keyfile.name}",
-                    f"--setopt=ubi-9-appstream-rpms.gpgkey=file://{keyfile.name}",
+                    f"--setopt=ubi-9-baseos-rpms.gpgkey=file://{builder_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
+                    f"--setopt=ubi-9-appstream-rpms.gpgkey=file://{builder_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
                     "install",
                     "python3.11",
                 ],
                 check=True,
             )
 
-            run(
-                [
-                    "dnf",
-                    "-y",
-                    "--noplugins",
-                    f"--installroot={production_mnt}",
-                    f"--releasever={RELEASEVER}",
-                    "clean",
-                    "all",
-                ],
-                check=True,
-            )
+        run(
+            [
+                "dnf",
+                "-y",
+                "--noplugins",
+                f"--installroot={production_mnt}",
+                f"--releasever={RELEASEVER}",
+                "clean",
+                "all",
+            ],
+            check=True,
+        )
 
-            shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
+        shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
 
         run(
             [
