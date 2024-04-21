@@ -22,7 +22,7 @@ def main(argv):  # pylint: disable=unused-argument
             "build",
             "--pull",
             "--layers",
-            "-v", f"{Path('~/.cache/pip').expanduser()}:/root/.cache/pip:O",
+            f"--volume={Path('~/.cache/pip').expanduser()}:/root/.cache/pip:O",
             f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
             "-t",
             "localhost/rsync.net-exporter-builder",
@@ -157,7 +157,9 @@ def buildah_mount(ctr):
 def run(args, *args_, **kwargs):
     print(f"::group::{args!r}", flush=True)
     try:
-        return subprocess.run(args, *args_, **kwargs)  # nosec pylint: disable=subprocess-run-check
+        return subprocess.run(
+            args, *args_, **kwargs
+        )  # nosec pylint: disable=subprocess-run-check
     finally:
         print(f"::endgroup::", flush=True)
 
