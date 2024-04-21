@@ -65,9 +65,6 @@ jobs:
     - name: Fix host RPM configuration to match container
       run: echo '%_dbpath %{_var}/lib/rpm' > ~/.rpmmacros
 
-    - name: Query RPM db path
-      run: rpm -E %_dbpath
-
     - name: Cache container storage
       uses: actions/cache@v4
       with:
