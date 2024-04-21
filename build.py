@@ -58,9 +58,6 @@ def main(argv):  # pylint: disable=unused-argument
                 "gunicorn.conf.py", production_mnt / "opt/app-root/gunicorn.conf.py"
             )
 
-            #with group("Import RPM PGP keys"):
-            #    run(["rpm", f"--root={production_mnt}", "--import", keyfile.name], check=True)
-
             with group("Check List installed packages"):
 
                 run(["rpm", f"--root={production_mnt}", "-qa"])
