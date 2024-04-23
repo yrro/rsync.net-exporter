@@ -55,10 +55,6 @@ jobs:
     - name: Run unit tests
       run: poetry run pytest --junit-xml=junit-default.xml
 
-    - name: Record build timestamp
-      id: rfc_3339
-      run: echo date=$(date --rfc-3339=seconds) >> $GITHUB_OUTPUT
-
     - name: Install DNF
       run: sudo apt install dnf
 
@@ -83,18 +79,10 @@ jobs:
         paths: junit-*.xml
       if: always()
 
-    - name: Extract base image from image
-      id: image_base_ref
-      run: echo ref=$(buildah inspect --type=image localhost/rsync.net-exporter | jq '[.History[] | select((.comment // "") | startswith("FROM "))] | first | .comment[5:]' -r) >> $GITHUB_OUTPUT
-
-    - name: Extract digest from base image
-      id: image_base_digest
-      run: echo digest=$(buildah inspect --type=image ${{ steps.image_base_ref.outputs.ref }} | jq '.FromImageDigest' -r) >> $GITHUB_OUTPUT
-
     - name: Create working container
       run: buildah from --pull=false --name=w localhost/rsync.net-exporter # github's image's buildah is too old to support --pull=never; regardless the use of localhost will also prevent pulling
 
-    - name: Apply additional image labels
+    - name: Apply additional image annotations
       run: |
         buildah config \
           --annotation=org.opencontainers.image.revision='${{ github.sha }}' \
@@ -105,8 +93,6 @@ jobs:
 
     - name: Commit working container
       run: buildah commit --rm w ghcr.io/yrro/rsync.net-exporter
-
-    - run: buildah inspect ghcr.io/yrro/rsync.net-exporter
 
     - name: Push image
       id: push
