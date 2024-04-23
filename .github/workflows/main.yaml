@@ -104,7 +104,7 @@ jobs:
           w
 
     - name: Commit working container
-      run: buildah commit w ghcr.io/yrro/rsync.net-exporter
+      run: buildah commit --rm w ghcr.io/yrro/rsync.net-exporter
 
     - run: buildah inspect ghcr.io/yrro/rsync.net-exporter
 
