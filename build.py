@@ -1,6 +1,8 @@
 import contextlib
+import datetime
 import json
 from logging import basicConfig, getLogger
+import os
 from pathlib import Path
 import shutil
 import subprocess  # nosec
@@ -36,6 +38,8 @@ def main(argv):  # pylint: disable=unused-argument
         ) as production_ctr,
         buildah_mount(production_ctr) as production_mnt,
     ):
+        pbase_inspect = run(["buildah", "inspect", "--type=container", production_ctr], text=True, stdout=subprocess.PIPE, check=True)
+        base_inspect = json.loads(pbase_inspect.stdout)
 
         (production_mnt / "opt/app-root").mkdir(parents=True)
 
@@ -106,6 +110,27 @@ def main(argv):  # pylint: disable=unused-argument
             if p.is_dir():
                 shutil.rmtree(p)
 
+        git_repo_url = os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"] if "GITHUB_ACTIONS" in os.environ else None
+        version = run(["poetry", "version", "--short"], stdout=subprocess.PIPE, text=True, check=False).stdout
+        git_commit = run(["git", "rev-parse", "--verify", "HEAD"], stdout=subprocess.PIPE, text=True, check=False).stdout
+
+        opencontainers_image_annotations = {
+            "created": datetime.datetime.now(tz=datetime.UTC).isoformat(sep=" "),
+            "authors": "Sam Morris <sam@robots.org.uk>",
+            "url": git_repo_url,
+            "documentation": git_repo_url,
+            "source": git_repo_url,
+            "version": version,
+            "revision": git_commit,
+            "vendor": "Sam Morris <sam@robots.org.uk>",
+            "licenses": None,  # Lots of licenses...
+            "ref.name": None,  # I have no idea what this one actually means, but I think it's not intended to be used with images anyway.
+            "title": "Prometheus exporter for rsync.net",
+            "description": "Prometheus exporter for rsync.net",
+            "base.digest": base_inspect["FromImageDigest"],
+            "base.name": base_inspect["FromImage"],
+        }
+
         run(
             [
                 "buildah",
@@ -118,6 +143,9 @@ def main(argv):  # pylint: disable=unused-argument
                 "--entrypoint=" + json.dumps(["venv/bin/python", "-m", "gunicorn"]),
                 "--cmd=",
                 "--stop-signal=SIGTERM",
+                "--label=-",
+                "--annotation=-",
+                *(f"--annotation=org.opencontainers.image.{k}={v}" for k, v in opencontainers_image_annotations if v),
                 production_ctr,
             ],
             check=True,
