@@ -38,7 +38,12 @@ def main(argv):  # pylint: disable=unused-argument
         ) as production_ctr,
         buildah_mount(production_ctr) as production_mnt,
     ):
-        pbase_inspect = run(["buildah", "inspect", "--type=container", production_ctr], text=True, stdout=subprocess.PIPE, check=True)
+        pbase_inspect = run(
+            ["buildah", "inspect", "--type=container", production_ctr],
+            text=True,
+            stdout=subprocess.PIPE,
+            check=True,
+        )
         base_inspect = json.loads(pbase_inspect.stdout)
 
         (production_mnt / "opt/app-root").mkdir(parents=True)
@@ -59,7 +64,8 @@ def main(argv):  # pylint: disable=unused-argument
                 ["rpm", "-E", "%_dbpath"], text=True, stdout=subprocess.PIPE
             )
             LOGGER.error(
-                "Runtime container has no RPM packages installed. Possibly the the value of %%_dbpath within the container differs from the value defined on the host (%r).", prpmdbpath.stdout.strip()
+                "Runtime container has no RPM packages installed. Possibly the the value of %%_dbpath within the container differs from the value defined on the host (%r).",
+                prpmdbpath.stdout.strip(),
             )
             return 1
 
@@ -110,9 +116,23 @@ def main(argv):  # pylint: disable=unused-argument
             if p.is_dir():
                 shutil.rmtree(p)
 
-        git_repo_url = os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"] if "GITHUB_ACTIONS" in os.environ else None
-        version = run(["poetry", "version", "--short"], stdout=subprocess.PIPE, text=True, check=False).stdout
-        git_commit = run(["git", "rev-parse", "--verify", "HEAD"], stdout=subprocess.PIPE, text=True, check=False).stdout
+        git_repo_url = (
+            os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"]
+            if "GITHUB_ACTIONS" in os.environ
+            else None
+        )
+        version = run(
+            ["poetry", "version", "--short"],
+            stdout=subprocess.PIPE,
+            text=True,
+            check=False,
+        ).stdout
+        git_commit = run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            stdout=subprocess.PIPE,
+            text=True,
+            check=False,
+        ).stdout
 
         opencontainers_image_annotations = {
             "created": datetime.datetime.now(tz=datetime.UTC).isoformat(sep=" "),
@@ -145,7 +165,11 @@ def main(argv):  # pylint: disable=unused-argument
                 "--stop-signal=SIGTERM",
                 "--label=-",
                 "--annotation=-",
-                *(f"--annotation=org.opencontainers.image.{k}={v}" for k, v in opencontainers_image_annotations if v),
+                *(
+                    f"--annotation=org.opencontainers.image.{k}={v}"
+                    for k, v in opencontainers_image_annotations
+                    if v
+                ),
                 production_ctr,
             ],
             check=True,
