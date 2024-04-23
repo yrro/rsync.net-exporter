@@ -115,18 +115,19 @@ def main(argv):  # pylint: disable=unused-argument
             if p.is_dir():
                 shutil.rmtree(p)
 
-        version = run(
-            ["poetry", "version", "--short"],
-            stdout=subprocess.PIPE,
-            text=True,
-            check=False,
-        ).stdout
-        git_commit = run(
-            ["git", "rev-parse", "--verify", "HEAD"],
-            stdout=subprocess.PIPE,
-            text=True,
-            check=False,
-        ).stdout
+        #version = run(
+        #    ["poetry", "version", "--short"],
+        #    stdout=subprocess.PIPE,
+        #    text=True,
+        #    check=False,
+        #).stdout
+
+        #git_commit = run(
+        #    ["git", "rev-parse", "--verify", "HEAD"],
+        #    stdout=subprocess.PIPE,
+        #    text=True,
+        #    check=False,
+        #).stdout
 
         opencontainers_image_annotations = {
             "created": datetime.datetime.now(tz=datetime.UTC).isoformat(sep=" "),
@@ -134,15 +135,15 @@ def main(argv):  # pylint: disable=unused-argument
             "url": None,
             "documentation": None,
             "source": None,
-            "version": version,
-            "revision": git_commit,
+            #"version": version,
+            #"revision": git_commit,
             "vendor": "Sam Morris <sam@robots.org.uk>",
             "licenses": None,  # Lots of licenses...
             "ref.name": None,  # I have no idea what this one actually means, but I think it's not intended to be used with images anyway.
             "title": "Prometheus exporter for rsync.net",
             "description": "Prometheus exporter for rsync.net",
-            "base.digest": base_inspect["FromImageDigest"],
-            "base.name": base_inspect["FromImage"],
+            #"base.digest": base_inspect["FromImageDigest"],
+            #"base.name": base_inspect["FromImage"],
         }
 
         run(
@@ -178,6 +179,8 @@ def main(argv):  # pylint: disable=unused-argument
             ],
             check=True,
         )
+
+        run(["buildah", "inspect", "localhost/rsync.net-exporter"], check=False)
 
     return 0
 
