@@ -54,12 +54,12 @@ def main(argv):  # pylint: disable=unused-argument
             stdout=subprocess.PIPE,
             check=True,
         )
-        if len(prpmqa.stdout.split("\n")) == 1:
+        if prpmqa.stdout == "":
             prpmdbpath = run(
                 ["rpm", "-E", "%_dbpath"], text=True, stdout=subprocess.PIPE
             )
             LOGGER.error(
-                f"Runtime container has no RPM packages installed. Possibly the the value of %_dbpath within the container differs from the value defined on the host (%r).", prpmdbpath.stdout.strip()
+                "Runtime container has no RPM packages installed. Possibly the the value of %%_dbpath within the container differs from the value defined on the host (%r).", prpmdbpath.stdout.strip()
             )
             return 1
 
