@@ -2,7 +2,6 @@ import contextlib
 import datetime
 import json
 from logging import basicConfig, getLogger
-import os
 from pathlib import Path
 import shutil
 import subprocess  # nosec
@@ -116,11 +115,6 @@ def main(argv):  # pylint: disable=unused-argument
             if p.is_dir():
                 shutil.rmtree(p)
 
-        git_repo_url = (
-            os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"]
-            if "GITHUB_ACTIONS" in os.environ
-            else None
-        )
         version = run(
             ["poetry", "version", "--short"],
             stdout=subprocess.PIPE,
@@ -137,9 +131,9 @@ def main(argv):  # pylint: disable=unused-argument
         opencontainers_image_annotations = {
             "created": datetime.datetime.now(tz=datetime.UTC).isoformat(sep=" "),
             "authors": "Sam Morris <sam@robots.org.uk>",
-            "url": git_repo_url,
-            "documentation": git_repo_url,
-            "source": git_repo_url,
+            "url": None,
+            "documentation": None,
+            "source": None,
             "version": version,
             "revision": git_commit,
             "vendor": "Sam Morris <sam@robots.org.uk>",
