@@ -161,7 +161,7 @@ def main(argv):  # pylint: disable=unused-argument
                 "--annotation=-",
                 *(
                     f"--annotation=org.opencontainers.image.{k}={v}"
-                    for k, v in opencontainers_image_annotations
+                    for k, v in opencontainers_image_annotations.items()
                     if v
                 ),
                 production_ctr,
