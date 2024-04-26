@@ -90,7 +90,7 @@ def main(argv):  # pylint: disable=unused-argument
                     f"--setopt=ubi-{RELEASEVER}-baseos-rpms.gpgkey=file://{builder_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
                     f"--setopt=ubi-{RELEASEVER}-appstream-rpms.gpgkey=file://{builder_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
                     "install",
-                    "python3.11",
+                    f"python{PYTHON_SUFFIX}",
                 ],
                 check=True,
             )
