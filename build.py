@@ -108,7 +108,38 @@ def main(argv):  # pylint: disable=unused-argument
             check=True,
         )
 
-        shutil.rmtree(production_mnt / f"usr/share/python{PYTHON_SUFFIX}-wheels")
+        unwanted_pkgs = [
+            f"python{PYTHON_SUFFIX}-setuptools-wheel",
+            f"python{PYTHON_SUFFIX}-pip-wheel",
+            "libnsl2",
+            "libtirpc",
+            "keyutils-libs",
+            "krb5-libs",
+            "libcom_err",
+            "libverto",
+            "pcre",
+            "gawk",
+            "mpfr",
+            "mpdecimal",
+            "gmp",
+            "grep",
+            "sqlite-libs",
+            "bzip2-libs",
+            "xz-libs",
+            "sed",
+            "readline",
+            "gdbm-libs",
+        ]
+        run(
+            [
+                "rpm",
+                f"--root={production_mnt}",
+                "--erase",
+                "--allmatches",
+                "--nodeps",
+                *unwanted_pkgs,
+            ]
+        )
 
         # <https://github.com/rpm-software-management/rpm/discussions/2735>
         for p in Path(production_mnt / "usr/share/locale").iterdir():
