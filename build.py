@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 import subprocess  # nosec
 import sys
+from tempfile import NamedTemporaryFile
 
 
 LOGGER = getLogger(__name__)
@@ -14,7 +15,7 @@ RELEASEVER = "9"
 PYTHON_SUFFIX = "3.11"
 
 
-def main(argv):  # pylint: disable=unused-argument
+def main(argv):  # pylint: disable=unused-argument,too-many-locals
 
     run(
         [
@@ -23,20 +24,31 @@ def main(argv):  # pylint: disable=unused-argument
             "--pull",
             "--layers",
             f"--volume={Path('~/.cache/pip').expanduser()}:/root/.cache/pip:O",
+            f"--volume={Path.cwd()}:/opt/app-build:O",
             f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
             "-t",
-            "localhost/rsync.net-exporter-builder",
+            "localhost/ngfw-edl-server-builder",
             "Containerfile.builder",
         ],
         check=True,
     )
+
+    rpmmacros = Path.home() / ".rpmmacros"
+    rpmmacros.touch(mode=0o644, exist_ok=True)
 
     with (
         buildah_from(
             ["--pull", f"registry.access.redhat.com/ubi{RELEASEVER}/ubi-micro"]
         ) as production_ctr,
         buildah_mount(production_ctr) as production_mnt,
+        NamedTemporaryFile(mode="w", prefix="rpmmacros-") as temp_rpmmacros,
+        mount(temp_rpmmacros.name, rpmmacros, ["bind"]),
     ):
+        # There's no option for DNF to tell it to define RPM macros, so we have
+        # to fall back to doing it with a config file.
+        temp_rpmmacros.write("%_dbpath %{_var}/lib/rpm\n")
+        temp_rpmmacros.flush()
+
         pbase_inspect = run(
             ["buildah", "inspect", "--type=container", production_ctr],
             text=True,
@@ -69,7 +81,7 @@ def main(argv):  # pylint: disable=unused-argument
             return 1
 
         with (
-            buildah_from(["localhost/rsync.net-exporter-builder"]) as builder_ctr,
+            buildah_from(["localhost/ngfw-edl-server-builder"]) as builder_ctr,
             buildah_mount(builder_ctr) as builder_mnt,
         ):
             shutil.copytree(
@@ -77,6 +89,14 @@ def main(argv):  # pylint: disable=unused-argument
                 production_mnt / "opt/app-root/venv",
                 symlinks=True,
             )
+
+            # We should be able to tell DNF to import the keys for repo 'foo'
+            # with '--setopt=foo.gpgkey=file://...', however this fails
+            # non-deterministically with the error "Parsing armored OpenPGP
+            # packet(s) failed". The workaround is to manually import all the
+            # keys shipped with the container image.
+            for p in Path(builder_mnt / "etc/pki/rpm-gpg").iterdir():
+                run(["rpm", f"--root={production_mnt}", "--import", p], check=True)
 
             run(
                 [
@@ -87,8 +107,6 @@ def main(argv):  # pylint: disable=unused-argument
                     f"--releasever={RELEASEVER}",
                     "--nodocs",
                     "--setopt=install_weak_deps=0",
-                    f"--setopt=ubi-{RELEASEVER}-baseos-rpms.gpgkey=file://{builder_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
-                    f"--setopt=ubi-{RELEASEVER}-appstream-rpms.gpgkey=file://{builder_mnt}/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release",
                     "install",
                     f"python{PYTHON_SUFFIX}",
                 ],
@@ -113,6 +131,7 @@ def main(argv):  # pylint: disable=unused-argument
             f"python{PYTHON_SUFFIX}-pip-wheel",
             "libnsl2",
             "libtirpc",
+            "libtasn1",
             "keyutils-libs",
             "krb5-libs",
             "libcom_err",
@@ -140,6 +159,16 @@ def main(argv):  # pylint: disable=unused-argument
                 *unwanted_pkgs,
             ]
         )
+
+        prpmqa2 = run(
+            ["rpm", f"--root={production_mnt}", "-qa"],
+            text=True,
+            stdout=subprocess.PIPE,
+            check=True,
+        )
+        LOGGER.info("Final package list:")
+        for line in sorted(prpmqa2.stdout.split("\n")):
+            LOGGER.info("%s", line)
 
         # <https://github.com/rpm-software-management/rpm/discussions/2735>
         for p in Path(production_mnt / "usr/share/locale").iterdir():
@@ -176,7 +205,8 @@ def main(argv):  # pylint: disable=unused-argument
                 "--port=9770/tcp",
                 "--user=1001:0",
                 "--workingdir=/opt/app-root",
-                "--entrypoint=" + json.dumps(["venv/bin/python", "-m", "gunicorn"]),
+                "--entrypoint="
+                + json.dumps(["venv/bin/python", "-I", "-m", "gunicorn"]),
                 "--cmd=",
                 "--stop-signal=SIGTERM",
                 "--label=-",
@@ -226,12 +256,20 @@ def buildah_mount(ctr):
         run(["buildah", "unmount", ctr], check=True)
 
 
+@contextlib.contextmanager
+def mount(device, mountpoint, options):
+    run(["mount", "-o", ",".join(options), device, mountpoint], check=True)
+    try:
+        yield
+    finally:
+        run(["umount", mountpoint], check=True)
+
+
 def run(args, *args_, **kwargs):
     print(f"::group::{args!r}", flush=True)
     try:
-        return subprocess.run(
-            args, *args_, **kwargs
-        )  # nosec pylint: disable=subprocess-run-check
+        # pylint: disable-next=subprocess-run-check
+        return subprocess.run(args, *args_, **kwargs)  # nosec
     finally:
         print("::endgroup::", flush=True)
 
