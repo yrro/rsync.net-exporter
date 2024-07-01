@@ -6,32 +6,35 @@ from pathlib import Path
 import shutil
 import subprocess  # nosec
 import sys
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 
 LOGGER = getLogger(__name__)
 
+PROJECT = "rsync.net-exporter"
 RELEASEVER = "9"
 PYTHON_SUFFIX = "3.11"
 
 
 def main(argv):  # pylint: disable=unused-argument,too-many-locals
 
-    run(
-        [
-            "buildah",
-            "build",
-            "--pull",
-            "--layers",
-            f"--volume={Path('~/.cache/pip').expanduser()}:/root/.cache/pip:O",
-            f"--volume={Path.cwd()}:/opt/app-build:O",
-            f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
-            "-t",
-            "localhost/ngfw-edl-server-builder",
-            "Containerfile.builder",
-        ],
-        check=True,
-    )
+    with TemporaryDirectory(prefix=f"{PROJECT}-") as temp_dist:
+        run(
+            [
+                "buildah",
+                "build",
+                "--pull",
+                "--layers",
+                f"--volume={Path('~/.cache/pip').expanduser()}:/root/.cache/pip:O",
+                f"--volume={Path.cwd()}:/opt/app-build:O",
+                f"--volume={temp_dist}:/opt/app-build/dist:Z",
+                f"--build-arg=PYTHON_SUFFIX={PYTHON_SUFFIX}",
+                "-t",
+                f"localhost/{PROJECT}-builder",
+                "Containerfile.builder",
+            ],
+            check=True,
+        )
 
     rpmmacros = Path.home() / ".rpmmacros"
     rpmmacros.touch(mode=0o644, exist_ok=True)
@@ -81,7 +84,7 @@ def main(argv):  # pylint: disable=unused-argument,too-many-locals
             return 1
 
         with (
-            buildah_from(["localhost/ngfw-edl-server-builder"]) as builder_ctr,
+            buildah_from([f"localhost/{PROJECT}-builder"]) as builder_ctr,
             buildah_mount(builder_ctr) as builder_mnt,
         ):
             shutil.copytree(
@@ -222,12 +225,7 @@ def main(argv):  # pylint: disable=unused-argument,too-many-locals
         )
 
         run(
-            [
-                "buildah",
-                "commit",
-                production_ctr,
-                "localhost/rsync.net-exporter",
-            ],
+            ["buildah", "commit", production_ctr, f"localhost/{PROJECT}"],
             check=True,
         )
 

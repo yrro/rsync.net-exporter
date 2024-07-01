@@ -8,17 +8,15 @@ RUN \
     python${PYTHON_SUFFIX}-pip \
   && microdnf -y clean all
 
+ENV PYTHONSAFEPATH=1
+
 ENV PIP_ROOT_USER_ACTION=ignore
 
 RUN python${PYTHON_SUFFIX} -m pip install build micropipenv[toml]
 
 WORKDIR /opt/app-build
 
-COPY pyproject.toml poetry.lock .
-
 # Build the app's wheel.
-
-COPY src src
 
 RUN python${PYTHON_SUFFIX} -m build -w -v
 
