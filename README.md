@@ -155,7 +155,7 @@ be able to run `dnf` within the builder container instead, so we won't need it
 installed on the host any more).
 
 ```
-$ buildah unshare python3 build.py
+$ buildah unshare python3 -I build.py
 ```
 
 If you don't want to install DNF, there's an unmaintained `Containerfile` that

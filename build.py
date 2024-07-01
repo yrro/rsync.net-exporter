@@ -13,7 +13,7 @@ LOGGER = getLogger(__name__)
 
 PROJECT = "rsync.net-exporter"
 RELEASEVER = "9"
-PYTHON_SUFFIX = "3.11"
+PYTHON_SUFFIX = "3.12"
 
 
 def main(argv):  # pylint: disable=unused-argument,too-many-locals

@@ -1157,10 +1157,7 @@ files = [
 [package.dependencies]
 astroid = ">=3.2.2,<=3.3.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
-dill = [
-    {version = ">=0.3.7", markers = "python_version >= \"3.12\""},
-    {version = ">=0.3.6", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
-]
+dill = {version = ">=0.3.7", markers = "python_version >= \"3.12\""}
 isort = ">=4.2.5,<5.13.0 || >5.13.0,<6"
 mccabe = ">=0.6,<0.8"
 platformdirs = ">=2.2.0"
@@ -1593,5 +1590,5 @@ production = ["gunicorn", "setproctitle"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.11"
-content-hash = "f81d63f498ea5205ac4b6f0c927f332f18def112976b661213f68c448443a2a9"
+python-versions = "^3.12"
+content-hash = "b1b08cf98def45e2c98c85db9e3bed552a66517e273c2089840ee6760d5b7c89"
