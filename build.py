@@ -164,7 +164,12 @@ def main(argv):  # pylint: disable=unused-argument,too-many-locals
         )
 
         prpmqa2 = run(
-            ["rpm", f"--root={production_mnt}", "-qa"],
+            [
+                "rpm",
+                f"--root={production_mnt}",
+                "-qa",
+                "--queryformat=%{nvra} ${size}\n",
+            ],
             text=True,
             stdout=subprocess.PIPE,
             check=True,
@@ -189,7 +194,7 @@ def main(argv):  # pylint: disable=unused-argument,too-many-locals
             "vendor": "Sam Morris <sam@robots.org.uk>",
             "licenses": None,  # Lots of licenses...
             "ref.name": None,  # I have no idea what this one actually means, but I think it's not intended to be used with images anyway.
-            "title": "Prometheus exporter for rsync.net",
+            "title": PROJECT,
             "description": "Prometheus exporter for rsync.net",
             "base.digest": base_inspect[
                 "FromImageDigest"
