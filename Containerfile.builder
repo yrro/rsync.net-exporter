@@ -10,7 +10,9 @@ RUN \
 
 ENV PYTHONSAFEPATH=1
 
-ENV PIP_ROOT_USER_ACTION=ignore
+ENV \
+  PIP_DISABLE_PIP_VERSION_CHECK=1 \
+  PIP_ROOT_USER_ACTION=ignore
 
 RUN python${PYTHON_SUFFIX} -m pip install build micropipenv[toml]
 
