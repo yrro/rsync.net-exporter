@@ -38,6 +38,7 @@ ENV PIP_PYTHON=/opt/app-root/venv/bin/python
 
 RUN \
   MICROPIPENV_PIP_BIN=pip${PYTHON_SUFFIX} \
+  MICROPIPENV_NO_LOCKFILE_WRITE=1 \
   python${PYTHON_SUFFIX} -m micropipenv \
     install --deploy
 
