@@ -64,10 +64,10 @@ $ poetry run gunicorn
 ```
 
 Once the exporter is running, use an HTTP client such as
-[HTTPie](https://httpie.io/) to probe for metrics:
+[curl](curl) to probe for metrics:
 
 ```
-$ poetry run http localhost:9770/probe target==https://www.rsync.net:443/rss/abc123def456ghi789
+$ curl localhost:9770/probe -G -d target=https://www.rsync.net:443/rss/abc123def456ghi789
 ```
 
 (Obtain your account's RSS URL from the storage account manager.)
@@ -119,7 +119,7 @@ $ poetry run flask run --debug
 Probe for metrics:
 
 ```
-$ poetry run http localhost:5000/probe target==https://www.rsync.net:443/rss/abc123def456ghi789
+$ curl localhost:9770/probe -G -d target=https://www.rsync.net:443/rss/abc123def456ghi789
 ```
 
 Run the tests:

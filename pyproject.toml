@@ -17,7 +17,6 @@ requests = "^2.31.0"
 gunicorn = {version = "^22.0.0", optional = true}
 
 [tool.poetry.group.dev.dependencies]
-httpie = "^3.2.1"
 mypy = "^1.0.1"
 python-dotenv = "^1.0.0"
 types-urllib3 = "^1.26.25.6"
