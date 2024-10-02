@@ -104,6 +104,16 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' # NOT a security check!
 
+    - name: Monitor image with Snyk
+      uses: snyk/actions/docker@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        command: monitor
+        image: ghcr.io/yrro/rsync.net-exporter:latest
+      if: steps.push.outcome == 'success'
+
     - name: Prune old images
       uses: snok/container-retention-policy@v2
       with:
