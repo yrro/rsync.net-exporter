@@ -46,7 +46,7 @@ rsyncnet_account_idle_seconds{location="CH",nickname="",uid="lp5570"} 0.0
 If you're into containers:
 
 ```
-$ podman run --name=rsync.net-exporter --net=host --rm --replace ghcr.io/yrro/rsync.net-exporter
+$ podman run --name=rsync.net-exporter --net=host --rm --replace quay.io/yrro/rsync.net-exporter
 ```
 
 You can provide any desired [Gunicorn

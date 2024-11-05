@@ -89,34 +89,13 @@ jobs:
           w
 
     - name: Commit working container
-      run: buildah commit --rm w ghcr.io/yrro/rsync.net-exporter
+      run: buildah commit --rm w quay.io/yrro/rsync.net-exporter
 
     - name: Push image
       id: push
       uses: redhat-actions/push-to-registry@v2
       with:
-        tags: ghcr.io/yrro/rsync.net-exporter:latest
-        username: _ignored_
-        password: ${{ secrets.GITHUB_TOKEN }}
+        tags: quay.io/yrro/rsync.net-exporter:latest
+        username: ${{ secrets.QUAY_USERNAME }}
+        password: ${{ secrets.QUAY_PASSWORD }}
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' # NOT a security check!
-
-    - name: Monitor image with Snyk
-      uses: snyk/actions/docker@master
-      continue-on-error: true
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        command: monitor
-        image: ghcr.io/yrro/rsync.net-exporter:latest
-      if: steps.push.outcome == 'success'
-
-    - name: Prune old images
-      uses: snok/container-retention-policy@v2
-      with:
-        image-names: rsync.net-exporter
-        cut-off: 1 minute ago UTC
-        keep-at-least: 5
-        account-type: personal
-        token: ${{ secrets.GITHUB_TOKEN }}
-        token-type: github-token
-      if: steps.push.outcome == 'success'
