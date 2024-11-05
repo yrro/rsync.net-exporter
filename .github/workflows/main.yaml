@@ -52,8 +52,11 @@ jobs:
     - name: Run unit tests
       run: poetry run pytest --junit-xml=junit-default.xml
 
+    - name: Update packgae lsits
+      run: sudo apt-get update
+
     - name: Install DNF
-      run: sudo apt install dnf
+      run: sudo apt-get install dnf
 
     - name: Fix host RPM configuration to match container
       run: echo '%_dbpath %{_var}/lib/rpm' > ~/.rpmmacros
