@@ -6,10 +6,6 @@ on:
 
   push:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
 
   test-build-push:
