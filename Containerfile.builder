@@ -3,7 +3,8 @@ FROM registry.access.redhat.com/ubi9/ubi-minimal as builder
 ARG PYTHON_SUFFIX
 
 RUN \
-  microdnf -y --nodocs --setopt=install_weak_deps=0 install \
+  microdnf -y --nodocs --setopt=install_weak_deps=0 upgrade \
+  && microdnf -y --nodocs --setopt=install_weak_deps=0 install \
     python${PYTHON_SUFFIX} \
     python${PYTHON_SUFFIX}-pip \
   && microdnf -y clean all

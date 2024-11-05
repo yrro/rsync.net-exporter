@@ -110,6 +110,20 @@ def main(argv):  # pylint: disable=unused-argument,too-many-locals
                     f"--releasever={RELEASEVER}",
                     "--nodocs",
                     "--setopt=install_weak_deps=0",
+                    "upgrade",
+                ],
+                check=True,
+            )
+
+            run(
+                [
+                    "dnf",
+                    "-y",
+                    "--noplugins",
+                    f"--installroot={production_mnt}",
+                    f"--releasever={RELEASEVER}",
+                    "--nodocs",
+                    "--setopt=install_weak_deps=0",
                     "install",
                     f"python{PYTHON_SUFFIX}",
                 ],
