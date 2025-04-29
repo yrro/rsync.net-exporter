@@ -44,7 +44,7 @@ jobs:
       run: poetry version "${{ steps.pep_440.outputs.version }}"
 
     - name: Update Poetry lock file
-      run: poetry lock --no-update
+      run: poetry lock
 
     - name: Install dependencies
       run: poetry install --with=dev
